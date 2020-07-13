@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Lol_notification_project</string>
+    <string name="channel_name">notify</string>
+    <string name="channel_des">notify channel</string>
+</resources>
