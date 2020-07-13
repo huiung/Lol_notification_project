@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var call: Call<Summoner>
     lateinit var call2: Call<Spectator>
     private val api_key = "RGAPI-18b4aaf9-942f-4072-acfa-56842c53d2e8"
-    var summonername = "나는평타싸개유저"
+    var summonername = "김디현"
 
     private val channelId = "my_channel"
 
@@ -49,8 +49,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun sendNotification() {
-
-        val GROUP_KEY_NOTIFY = "group_key_notify"
 
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -104,6 +102,9 @@ class MainActivity : AppCompatActivity() {
                 call2 = myAPI.getspectator(id, api_key)
                 var response2 = call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
                 if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
+
+                    for(i in 0..9)
+                        Log.d("mytag", response2.body()!!.participants[i].summonerName)
                     sendNotification()
                 }
                 else {

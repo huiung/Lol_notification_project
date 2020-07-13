@@ -8,10 +8,10 @@ class Spectator {
     var gameLength: String? = null
     var platformId: String? = null
     var gameMode: String? = null
-    lateinit var bannedChampions: Array<BannedChampion>
+    lateinit var bannedChampions: List<BannedChampion>
     var gameQueueConfigId: Long? = null
-    private var observers: Observers? = null
-    private lateinit var participants: Array<CurrentGameParticipant>
+    var observers: Observers? = null
+    lateinit var participants: List<CurrentGameParticipant>
 
     override fun toString(): String {
         return "[gameId = $gameId, gameType = $gameType, gameStartTime = $gameStartTime, mapId = $mapId, platformId = $platformId, gameLength = $gameLength, gameMode = $gameMode, gameQueueConfigId = $gameQueueConfigId, bannedChampions = $bannedChampions, observers = $observers, participants = $participants]"
@@ -48,7 +48,7 @@ class CurrentGameParticipant {
     var summonerId: String? = null
     var spell1Id: Long? = null
     var spell2Id: Long? = null
-    lateinit var gameCustomizationObjects: Array<GameCustomizationObject>
+    lateinit var gameCustomizationObjects: List<GameCustomizationObject>
 
     override fun toString(): String {
         return "[championId = $championId, profileIconId = $profileIconId, bot = $bot, teamId = $teamId, summonerName = $summonerName, spell1Id = $spell1Id, summonerId = $summonerId, spell2Id = $spell2Id, perks = $perks, gameCustomizationObjects = $gameCustomizationObjects]"
@@ -56,7 +56,7 @@ class CurrentGameParticipant {
 }
 
 class Perks {
-    lateinit var perkIds: Array<Long>
+    lateinit var perkIds: List<Long>
     var perkSubStyle: Long? = null
     var perkStyle: Long? = null
 
