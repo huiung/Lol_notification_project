@@ -1,4 +1,4 @@
-package com.example.lol_notification_project
+package com.example.lol_notification_project.Retrofit2
 
 import com.example.lol_notification_project.JsonType.Spectator
 import com.example.lol_notification_project.JsonType.Summoner

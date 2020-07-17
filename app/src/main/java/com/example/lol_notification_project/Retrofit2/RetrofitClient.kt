@@ -1,4 +1,4 @@
-package com.example.lol_notification_project
+package com.example.lol_notification_project.Retrofit2
 
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
