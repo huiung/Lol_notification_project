@@ -2,4 +2,5 @@
     <string name="app_name">Lol_notification_project</string>
     <string name="channel_name">notify</string>
     <string name="channel_des">notify channel</string>
+    <string name="API_KEY">RGAPI-02a2f70a-47bc-4ed6-bd50-688f9dd41866</string>
 </resources>

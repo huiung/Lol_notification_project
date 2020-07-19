@@ -1,5 +1,6 @@
 package com.example.lol_notification_project.Retrofit2
 
+import com.example.lol_notification_project.JsonType.LeagueEntryDTO
 import com.example.lol_notification_project.JsonType.Spectator
 import com.example.lol_notification_project.JsonType.Summoner
 import retrofit2.Call
@@ -19,5 +20,10 @@ interface MyServer {
         @Query("api_key") api_key : String
     ): Call<Spectator>
 
+    @GET("league/v4/entries/by-summoner/{encryptedSummonerId}")
+    fun getLeague(
+        @Path("encryptedSummonerId") encryptedSummonerId : String?,
+        @Query("api_key") api_key: String
+    ): Call<Set<LeagueEntryDTO>>
 
 }

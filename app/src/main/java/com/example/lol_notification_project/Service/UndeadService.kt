@@ -27,7 +27,7 @@ class UndeadService : Service() {
     lateinit var id: String
     lateinit var call: Call<Summoner>
     lateinit var call2: Call<Spectator>
-    private val api_key = "RGAPI-75374fc3-04ec-47e3-8bef-855be879266f"
+    private val api_key = "RGAPI-02a2f70a-47bc-4ed6-bd50-688f9dd41866"
     private val channelId = "my_channel"
     var mainThread: Thread? = null
 
@@ -35,16 +35,12 @@ class UndeadService : Service() {
         var serviceIntent: Intent? = null //static
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        Log.d("mytag", "하윙")
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         serviceIntent = intent
         createNotificationChannel()
         retrofit = RetrofitClient.getInstnace()
-        myAPI = retrofit.create(MyServer::class.java)
+        myAPI = RetrofitClient.getServer()
 
         mainThread = Thread( Runnable() {
             var cnt = 0
@@ -68,9 +64,16 @@ class UndeadService : Service() {
                                 var response2 = call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
                                 if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
 
-                                    /*for(i in 0..9)
-                                    Log.d("mytag", response2.body()!!.participants[i].summonerName)*/
-                                    sendNotification(curname, curint++)
+                                    if(Preferences.getLong(applicationContext, curname+" game") != response2.body()!!.gameId ) { //동일게임이면 알림 X
+                                        response2.body()!!.gameId?.let {
+                                            Preferences.setLong(applicationContext,curname+" game", it
+                                            )
+                                        }
+                                        sendNotification(curname, curint++)
+                                    }
+                                    else { //이전에 알림 보낸게임과 동일게임임
+                                        Log.d("mytag", "동일게임")
+                                    }
                                 } else {
                                     //게임중 아님 앱 화면에 표시
                                     Log.d("mytag", "현재 게임중이 아닙니다.")
@@ -79,7 +82,7 @@ class UndeadService : Service() {
                                 //존재하는 소환사만 애초에 등록 했으므로 올일 없음.
                             }
                         } //for
-                        Thread.sleep(12000) //60초 쉬고 쿼리 날림
+                        Thread.sleep(80000) //60초 쉬고 쿼리 날림
                     } catch (e: Exception) {
                         flag = false
                     }
