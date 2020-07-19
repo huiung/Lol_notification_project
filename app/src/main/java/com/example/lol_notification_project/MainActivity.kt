@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var call2: Call<Set<LeagueEntryDTO>>
     lateinit var asynctask: SummonerAsyncTask
     lateinit var recyclerView: RecyclerView
-    private val api_key = "RGAPI-209a229e-c2fa-4b24-bc9a-76b2f8ac7096"
+    private val api_key = "Your API KEY"
 
     companion object {
         var mToast: Toast? = null //static

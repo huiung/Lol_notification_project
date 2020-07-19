@@ -27,7 +27,7 @@ class UndeadService : Service() {
     lateinit var id: String
     lateinit var call: Call<Summoner>
     lateinit var call2: Call<Spectator>
-    private val api_key = "RGAPI-209a229e-c2fa-4b24-bc9a-76b2f8ac7096"
+    private val api_key = "Your API KEY"
     private val channelId = "my_channel"
     var mainThread: Thread? = null
 
