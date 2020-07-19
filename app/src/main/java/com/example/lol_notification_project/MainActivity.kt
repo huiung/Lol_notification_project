@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var call2: Call<Set<LeagueEntryDTO>>
     lateinit var asynctask: SummonerAsyncTask
     lateinit var recyclerView: RecyclerView
-    private val api_key = "RGAPI-02a2f70a-47bc-4ed6-bd50-688f9dd41866"
+    private val api_key = "RGAPI-209a229e-c2fa-4b24-bc9a-76b2f8ac7096"
 
     companion object {
         var mToast: Toast? = null //static
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() { //파괴되면 stopService 호출
+    override fun onDestroy() {
         super.onDestroy()
 
         asynctask.cancel(false)
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    inner class SummonerAsyncTask : AsyncTask<Void, Void, Void>() {
+    inner class SummonerAsyncTask : AsyncTask<Void, Void, Void>() { //앱 실행시 등록된 소환사들을 cardview 형태로 뿌려줌
 
         lateinit var allname: MutableSet<String>
         lateinit var iterator: MutableIterator<String>
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity() {
             super.onProgressUpdate(*values)
         }
 
-        override fun onPostExecute(result: Void?) { // 카드뷰 ㄲㄲ
+        override fun onPostExecute(result: Void?) { // recyclerView ㄲㄲ
             super.onPostExecute(result)
             recyclerView = recyclerview_main
             recyclerView.layoutManager = LinearLayoutManager(applicationContext)

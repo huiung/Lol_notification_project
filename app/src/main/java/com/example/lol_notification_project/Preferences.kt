@@ -46,5 +46,4 @@ object Preferences {
         return preferences.getLong(key, -1) //default 값
     }
 
-
 }
