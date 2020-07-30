@@ -24,71 +24,75 @@ class UndeadService : Service() {
 
     lateinit var retrofit: Retrofit
     lateinit var myAPI: MyServer
-    lateinit var id: String
-    lateinit var call: Call<Summoner>
     lateinit var call2: Call<Spectator>
-    private val api_key = "Your API KEY"
+    var api_key: String? = " "
     private val channelId = "my_channel"
     var mainThread: Thread? = null
+    var isswitch = false
 
     companion object {
         var serviceIntent: Intent? = null //static
     }
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        isswitch = Preferences.getBool(applicationContext, "switch")
         serviceIntent = intent
         createNotificationChannel()
         retrofit = RetrofitClient.getInstnace()
         myAPI = RetrofitClient.getServer()
+        api_key = Preferences.getAPI(applicationContext, "Api_key")
 
-        mainThread = Thread( Runnable() {
-            var cnt = 0
-            var flag = true
-            while(flag) {
-                synchronized(this) {
-                    try {
-                        val allname = Preferences.getAllKeys(applicationContext)
-                        var iterator = allname.iterator()
-                        var curint = 0
-                        while(iterator.hasNext()) {
-                            val curname = iterator.next()
-                            Log.d("mytag", curname)
+        api_key?.let { api_key ->
+            mainThread = Thread(Runnable() {
+                var cnt = 0
+                var flag = true
+                while (flag) {
+                    synchronized(this) {
+                        try {
+                            val allname = Preferences.getAll(applicationContext)
+                            var curint = 0
+                            allname?.let {
+                                for ((key, value) in it.entries) {
+                                    val curname = key
+                                    val curId = value.toString()
 
-                            call = myAPI.getsummoner(curname, api_key)
-                            var response = call.execute()
-                            if (response.isSuccessful) {//먼저 소환사 이름으로 encryptedId 얻어옴
-                                id = response.body()?.id ?: "no id"
+                                    call2 = myAPI.getspectator(curId, api_key)
+                                    var response2 =
+                                        call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
+                                    if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
 
-                                call2 = myAPI.getspectator(id, api_key)
-                                var response2 = call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
-                                if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
-
-                                    if(Preferences.getLong(applicationContext, curname+" game") != response2.body()!!.gameId ) { //동일게임이면 알림 X
-                                        response2.body()!!.gameId?.let {
-                                            Preferences.setLong(applicationContext,curname+" game", it
-                                            )
+                                        if (Preferences.getLong(
+                                                applicationContext,
+                                                curname + " game"
+                                            ) != response2.body()!!.gameId
+                                        ) { //동일게임이면 알림 X
+                                            response2.body()!!.gameId?.let {
+                                                Preferences.setLong(
+                                                    applicationContext, curname + " game", it
+                                                )
+                                            }
+                                            sendNotification(curname, curint++)
+                                        } else { //이전에 알림 보낸게임과 동일게임임
+                                            Log.d("mytag", "동일게임")
                                         }
-                                        sendNotification(curname, curint++)
+                                    } else {
+                                        //게임중 아님 앱 화면에 표시
+                                        Log.d("mytag", "현재 게임중이 아닙니다.")
                                     }
-                                    else { //이전에 알림 보낸게임과 동일게임임
-                                        Log.d("mytag", "동일게임")
-                                    }
-                                } else {
-                                    //게임중 아님 앱 화면에 표시
-                                    Log.d("mytag", "현재 게임중이 아닙니다.")
                                 }
-                            } else {
-                                //존재하는 소환사만 애초에 등록 했으므로 올일 없음.
                             }
-                        } //for
-                        Thread.sleep(80000) //60초 쉬고 쿼리 날림
-                    } catch (e: Exception) {
-                        flag = false
+                            Thread.sleep(5000) //80초 쉬고 쿼리 날림
+                            isswitch = Preferences.getBool(applicationContext, "switch")
+                            if(!isswitch) {
+                                stopSelf(startId)
+                            }
+                        } catch (e: Exception) {
+                            flag = false
+                        }
                     }
-                }
-            } //while
-        })
+                } //while
+            })
+        }
         mainThread?.start()
 
         return START_NOT_STICKY
@@ -103,7 +107,9 @@ class UndeadService : Service() {
         super.onDestroy()
 
         Log.d("mytag", "서비스 onDestroy")!!
-        setAlarmTimer() //알람을 키고 진행중인 쓰레드 모두 종료
+        //알람을 키고 진행중인 쓰레드 모두 종료
+
+        if(isswitch) setAlarmTimer()
         Thread.currentThread().interrupt()
         mainThread?.interrupt()
         mainThread = null
@@ -114,7 +120,11 @@ class UndeadService : Service() {
         super.onTaskRemoved(rootIntent)
 
         Log.d("mytag", "onTaskRemoved")!!
-        setAlarmTimer()
+        if(isswitch) setAlarmTimer()
+        Thread.currentThread().interrupt()
+        mainThread?.interrupt()
+        mainThread = null
+        serviceIntent = null
     }
 
     private fun sendNotification(curname: String, id: Int) {

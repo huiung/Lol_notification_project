@@ -9,25 +9,49 @@ object Preferences {
 
     private lateinit var preferences: SharedPreferences
 
-    fun setbool(context: Context, key: String, value: Boolean) {
-        preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
+    fun setAPI(context: Context, key: String, value: String) {
+        preferences = context.getSharedPreferences("API", Activity.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putString(key, value)
+        editor.commit()
+    }
+
+    fun getAPI(context: Context, key: String) : String? {
+        preferences = context.getSharedPreferences("API", Activity.MODE_PRIVATE)
+        return preferences.getString(key, " ")
+    }
+
+    fun setBool(context: Context, key: String, value: Boolean) {
+        preferences = context.getSharedPreferences("API", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putBoolean(key, value)
         editor.commit()
     }
 
-    fun getbool(context: Context, key: String) : Boolean{
-        preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
+    fun getBool(context: Context, key: String) : Boolean {
+        preferences = context.getSharedPreferences("API", Activity.MODE_PRIVATE)
         return preferences.getBoolean(key, false)
     }
 
-    fun getAllKeys(context: Context) : MutableSet<String>{
+    fun setString(context: Context, key: String, value: String) {
         preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
-        val arr = preferences.all.keys
+        val editor = preferences.edit()
+        editor.putString(key, value)
+        editor.commit()
+    }
+
+    fun getString(context: Context, key: String) : String? {
+        preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
+        return preferences.getString(key, "NoID")
+    }
+
+    fun getAll(context: Context) : MutableMap<String, *>? {
+        preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
+        val arr = preferences.all
         return arr
     }
 
-    fun removebool(context: Context, key: String) {
+    fun removeString(context: Context, key: String) {
         preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.remove(key)

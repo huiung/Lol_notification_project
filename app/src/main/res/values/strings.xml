@@ -3,4 +3,7 @@
     <string name="channel_name">notify</string>
     <string name="channel_des">notify channel</string>
     <string name="API_KEY">RGAPI-02a2f70a-47bc-4ed6-bd50-688f9dd41866</string>
+    <string name="input_your_key">input your_key</string>
+    <string name="key">Key 변경</string>
+    <string name="add">등록하기</string>
 </resources>
