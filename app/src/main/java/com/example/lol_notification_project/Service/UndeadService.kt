@@ -81,7 +81,7 @@ class UndeadService : Service() {
                                     }
                                 }
                             }
-                            Thread.sleep(5000) //80초 쉬고 쿼리 날림
+                            Thread.sleep(80000) //80초 쉬고 쿼리 날림
                             isswitch = Preferences.getBool(applicationContext, "switch")
                             if(!isswitch) {
                                 stopSelf(startId)
