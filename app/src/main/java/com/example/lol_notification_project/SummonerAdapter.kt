@@ -20,20 +20,14 @@ class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val con
         var itemwinLoss: TextView = itemView.item_winLoss
     }
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): SummonerViewHolder {
-        var v = LayoutInflater.from(parent.context).inflate(R.layout.card_layout, parent, false)
-        return SummonerViewHolder(v)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SummonerViewHolder = (
+        SummonerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_layout, parent, false))
+            )
 
-    override fun getItemCount(): Int {
-        return summonerInfo.size
-    }
+    override fun getItemCount(): Int = summonerInfo.size
+
 
     override fun onBindViewHolder(holder: SummonerViewHolder, position: Int) {
-
         GlideApp.with(context)
                 .load("https://ddragon.leagueoflegends.com/cdn/10.14.1/img/profileicon/${summonerInfo.get(position).profileIconId}.png") //이미지 URL 파싱
                 .into(holder.itemimage)

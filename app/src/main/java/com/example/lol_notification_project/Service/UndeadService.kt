@@ -16,6 +16,8 @@ import com.example.lol_notification_project.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.Retrofit2.MyServer
 import com.example.lol_notification_project.Retrofit2.RetrofitClient
+import kotlinx.coroutines.*
+import okhttp3.Dispatcher
 import retrofit2.Call
 import retrofit2.Retrofit
 import java.util.*
@@ -25,51 +27,46 @@ class UndeadService : Service() {
     lateinit var retrofit: Retrofit
     lateinit var myAPI: MyServer
     lateinit var call2: Call<Spectator>
+    lateinit var scope: CoroutineScope
     var api_key: String? = " "
     private val channelId = "my_channel"
-    var mainThread: Thread? = null
     var isswitch = false
+    lateinit var job: Job
 
     companion object {
         var serviceIntent: Intent? = null //static
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        scope = CoroutineScope(Dispatchers.Default)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        isswitch = Preferences.getBool(applicationContext, "switch")
+        isswitch = Preferences.getBool(this, "switch")
         serviceIntent = intent
         createNotificationChannel()
         retrofit = RetrofitClient.getInstnace()
         myAPI = RetrofitClient.getServer()
-        api_key = Preferences.getAPI(applicationContext, "Api_key")
+        api_key = Preferences.getAPI(this, "Api_key")
 
         api_key?.let { api_key ->
-            mainThread = Thread(Runnable() {
-                var cnt = 0
+            job = scope.launch {
                 var flag = true
                 while (flag) {
-                    synchronized(this) {
                         try {
-                            val allname = Preferences.getAll(applicationContext)
+                            val allname = Preferences.getAll(baseContext)
                             var curint = 0
                             allname?.let {
                                 for ((key, value) in it.entries) {
                                     val curname = key
                                     val curId = value.toString()
-
                                     call2 = myAPI.getspectator(curId, api_key)
-                                    var response2 =
-                                        call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
+                                    var response2 = call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
                                     if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
-
-                                        if (Preferences.getLong(
-                                                applicationContext,
-                                                curname + " game"
-                                            ) != response2.body()!!.gameId
-                                        ) { //동일게임이면 알림 X
+                                        if (Preferences.getLong(baseContext, curname + " game") != response2.body()!!.gameId) { //동일게임이면 알림 X
                                             response2.body()!!.gameId?.let {
-                                                Preferences.setLong(
-                                                    applicationContext, curname + " game", it
-                                                )
+                                                Preferences.setLong(baseContext, curname + " game", it)
                                             }
                                             sendNotification(curname, curint++)
                                         } else { //이전에 알림 보낸게임과 동일게임임
@@ -81,20 +78,17 @@ class UndeadService : Service() {
                                     }
                                 }
                             }
-                            Thread.sleep(80000) //80초 쉬고 쿼리 날림
-                            isswitch = Preferences.getBool(applicationContext, "switch")
+                            delay(60000) //80초 쉬고 쿼리 날림
+                            isswitch = Preferences.getBool(baseContext, "switch")
                             if(!isswitch) {
                                 stopSelf(startId)
                             }
                         } catch (e: Exception) {
                             flag = false
                         }
-                    }
                 } //while
-            })
+            }
         }
-        mainThread?.start()
-
         return START_NOT_STICKY
     }
 
@@ -102,28 +96,26 @@ class UndeadService : Service() {
         return null
     }
 
-
     override fun onDestroy() { //Service Destroy 시 Alarm을 호출함 -> Alarm은 받은 intent를 broadcats -> Alarmreceiver가 이를 수신하여 서비스 재시작
         super.onDestroy()
 
         Log.d("mytag", "서비스 onDestroy")!!
-        //알람을 키고 진행중인 쓰레드 모두 종료
-
+        //알람을 키고 진행중인 job cancel
         if(isswitch) setAlarmTimer()
-        Thread.currentThread().interrupt()
-        mainThread?.interrupt()
-        mainThread = null
-        serviceIntent = null
+
+        job?.let {
+            it.cancel()
+        }
+            serviceIntent = null
     }
+
 
     override fun onTaskRemoved(rootIntent: Intent?) { //Task Kill시
         super.onTaskRemoved(rootIntent)
 
         Log.d("mytag", "onTaskRemoved")!!
         if(isswitch) setAlarmTimer()
-        Thread.currentThread().interrupt()
-        mainThread?.interrupt()
-        mainThread = null
+        job.cancel()
         serviceIntent = null
     }
 
