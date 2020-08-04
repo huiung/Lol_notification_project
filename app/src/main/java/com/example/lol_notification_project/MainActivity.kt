@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var myAPI: MyServer
     lateinit var call: Call<Summoner>
     lateinit var call2: Call<Set<LeagueEntryDTO>>
-    lateinit var recyclerView: RecyclerView
+    val summonerAdapter = SummonerAdapter(arrayListOf(), this)
 
     lateinit var allname: MutableMap<String, *>
     lateinit var iterator: MutableIterator<String>
@@ -106,13 +106,29 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        swipe_refresh.setOnRefreshListener {
+            Log.d("mytag", "하이^^")
+            summonerJob = scope.launch {
+                if(isActive) {
+                    SummonerCoroutine()
+                    showJob = CoroutineScope(Dispatchers.Main).launch {
+                        summonerAdapter.updateSummoner(summonerInfo)
+                        recyclerview_main.adapter = summonerAdapter
+                    }
+                }
+                swipe_refresh.isRefreshing = false
+            }
+        }
+
         summonerJob = scope.launch {
             if(isActive) {
                 SummonerCoroutine()
                 showJob = CoroutineScope(Dispatchers.Main).launch {
-                    recyclerView = recyclerview_main
-                    recyclerView.layoutManager = LinearLayoutManager(baseContext)
-                    recyclerView.adapter = SummonerAdapter(summonerInfo, baseContext)
+                    recyclerview_main.apply {
+                        layoutManager = LinearLayoutManager(baseContext)
+                        summonerAdapter.updateSummoner(summonerInfo)
+                        adapter = summonerAdapter
+                    }
                 }
             }
         }
@@ -145,6 +161,7 @@ class MainActivity : AppCompatActivity() {
 
 
     fun SummonerCoroutine() {
+        summonerInfo.clear()
         allname = Preferences.getAll(this)!!
         for ((key, value) in allname.entries) {
             api_key?.let { api_key->

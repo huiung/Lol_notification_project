@@ -10,7 +10,7 @@ import com.example.lol_notification_project.Service.UndeadService
 
 class RebootReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(context: Context, p1: Intent) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { //오레오 이상에선 background에서 startService 불가
             val intent = Intent(context, RestartService::class.java)
             context.startForegroundService(intent)

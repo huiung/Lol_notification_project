@@ -12,6 +12,12 @@ import kotlinx.android.synthetic.main.card_layout.view.*
 
 class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val context: Context): RecyclerView.Adapter<SummonerAdapter.SummonerViewHolder>() {
 
+    fun updateSummoner(newSummoner: List<SummonerInfo>) {
+        summonerInfo.clear()
+        summonerInfo.addAll(newSummoner)
+        notifyDataSetChanged()
+    }
+
     class SummonerViewHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
         var itemimage: ImageView = itemview.item_image
         var itemid: TextView = itemview.item_id
@@ -20,9 +26,7 @@ class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val con
         var itemwinLoss: TextView = itemView.item_winLoss
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SummonerViewHolder = (
-        SummonerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_layout, parent, false))
-            )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SummonerViewHolder = (SummonerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_layout, parent, false)))
 
     override fun getItemCount(): Int = summonerInfo.size
 

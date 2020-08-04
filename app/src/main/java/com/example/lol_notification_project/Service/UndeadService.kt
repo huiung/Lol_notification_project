@@ -31,7 +31,7 @@ class UndeadService : Service() {
     var api_key: String? = " "
     private val channelId = "my_channel"
     var isswitch = false
-    lateinit var job: Job
+    var job: Job? = null
 
     companion object {
         var serviceIntent: Intent? = null //static
@@ -99,7 +99,7 @@ class UndeadService : Service() {
     override fun onDestroy() { //Service Destroy 시 Alarm을 호출함 -> Alarm은 받은 intent를 broadcats -> Alarmreceiver가 이를 수신하여 서비스 재시작
         super.onDestroy()
 
-        Log.d("mytag", "서비스 onDestroy")!!
+        Log.d("mytag", "서비스 onDestroy")
         //알람을 키고 진행중인 job cancel
         if(isswitch) setAlarmTimer()
 
@@ -113,9 +113,11 @@ class UndeadService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) { //Task Kill시
         super.onTaskRemoved(rootIntent)
 
-        Log.d("mytag", "onTaskRemoved")!!
+        Log.d("mytag", "onTaskRemoved")
         if(isswitch) setAlarmTimer()
-        job.cancel()
+        job?.let {
+            it.cancel()
+        }
         serviceIntent = null
     }
 
