@@ -1,23 +1,26 @@
-package com.example.lol_notification_project
+package com.example.lol_notification_project.View
 
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.lol_notification_project.JsonType.LeagueEntryDTO
-import com.example.lol_notification_project.JsonType.Summoner
-import com.example.lol_notification_project.Retrofit2.MyServer
-import com.example.lol_notification_project.Retrofit2.RetrofitClient
+import com.example.lol_notification_project.Model.Data.LeagueEntryDTO
+import com.example.lol_notification_project.Model.Data.Summoner
+import com.example.lol_notification_project.Model.SummonerAPI
+import com.example.lol_notification_project.Model.RetrofitClient
+import com.example.lol_notification_project.Preferences
+import com.example.lol_notification_project.R
 import com.example.lol_notification_project.Service.UndeadService
+import com.example.lol_notification_project.SummonerAdapter
+import com.example.lol_notification_project.SummonerInfo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import okhttp3.Dispatcher
 import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 
 
@@ -26,9 +29,7 @@ class MainActivity : AppCompatActivity() {
     var foregroundServiceIntent: Intent? = null
 
     lateinit var retrofit: Retrofit
-    lateinit var myAPI: MyServer
-    lateinit var call: Call<Summoner>
-    lateinit var call2: Call<Set<LeagueEntryDTO>>
+    lateinit var myAPI: SummonerAPI
     val summonerAdapter = SummonerAdapter(arrayListOf(), this)
 
     lateinit var allname: MutableMap<String, *>
@@ -36,9 +37,7 @@ class MainActivity : AppCompatActivity() {
     var summonerInfo: ArrayList<SummonerInfo> = ArrayList()
 
     var summonerJob: Job? = null
-    var showJob: Job? = null
     var storeUserJob: Job? = null
-    var showUserJob: Job? = null
 
     var scope = CoroutineScope(Dispatchers.Default)
     var api_key: String? = " "
@@ -52,20 +51,27 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        isswitch = Preferences.getBool(this, "switch")
-        api_key = Preferences.getAPI(this, "Api_key")
+        isswitch = Preferences.getBool(
+            this,
+            "switch"
+        )
+        api_key = Preferences.getAPI(
+            this,
+            "Api_key"
+        )
         retrofit = RetrofitClient.getInstnace()
         myAPI = RetrofitClient.getServer()
 
-        if(isswitch) {
+        if (isswitch) {
             switch1.toggle()
         }
 
-        button.setOnClickListener { //등록
+        button.setOnClickListener {
+            //등록
             storeUserJob = scope.launch {
-                if(isActive) {
-                    val id = StoreCoroutine()
-                    showUserJob = CoroutineScope(Dispatchers.Main).launch {
+                if (isActive) {
+                    val id = Storeid()
+                    withContext(Dispatchers.Main) {
                         if (id.second == null) makeToastComment("존재하지 않는 아이디입니다.")
                         else makeToast(id.first!!, id.second!!)
                     }
@@ -73,13 +79,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        button2.setOnClickListener {//삭제
+        button2.setOnClickListener {
+            //삭제
             val str = editText.text.toString()
-            if(Preferences.getString(this, str) != "NoID") {
-                Preferences.removeString(this, str)
+            if (Preferences.getString(
+                    this,
+                    str
+                ) != "NoID"
+            ) {
+                Preferences.removeString(
+                    this,
+                    str
+                )
                 makeToastComment("삭제 완료")
-            }
-            else {
+            } else {
                 makeToastComment("등록되지 않은 소환사 입니다.")
             }
         }
@@ -87,31 +100,36 @@ class MainActivity : AppCompatActivity() {
         button3.setOnClickListener {
             val str = editText2.text.toString()
             api_key = str
-            Preferences.setAPI(this, "Api_key", str)
+            Preferences.setAPI(
+                this,
+                "Api_key",
+                str
+            )
             makeToastComment("변경 완료")
         }
 
         switch1.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
-            if(b) {
-                Preferences.setBool(this, "switch", true)
-                if (UndeadService.serviceIntent == null) { //서비스가 실행중이지 않으면 실행
-                    foregroundServiceIntent = Intent(this, UndeadService::class.java);
-                    startService(foregroundServiceIntent)
-                } else { //실행중이면 Intent저장
-                    foregroundServiceIntent = UndeadService.serviceIntent
-                }
-            }
-            else {
-                Preferences.setBool(this, "switch", false)
+            if (b) {
+                Preferences.setBool(
+                    this,
+                    "switch",
+                    true
+                )
+                ServiceIntent()
+            } else {
+                Preferences.setBool(
+                    this,
+                    "switch",
+                    false
+                )
             }
         }
 
         swipe_refresh.setOnRefreshListener {
-            Log.d("mytag", "하이^^")
             summonerJob = scope.launch {
-                if(isActive) {
-                    SummonerCoroutine()
-                    showJob = CoroutineScope(Dispatchers.Main).launch {
+                if (isActive) {
+                    StoreSummoner()
+                    withContext(Dispatchers.Main) {
                         summonerAdapter.updateSummoner(summonerInfo)
                         recyclerview_main.adapter = summonerAdapter
                     }
@@ -121,9 +139,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         summonerJob = scope.launch {
-            if(isActive) {
-                SummonerCoroutine()
-                showJob = CoroutineScope(Dispatchers.Main).launch {
+            if (isActive) {
+                StoreSummoner()
+                withContext(Dispatchers.Main) {
                     recyclerview_main.apply {
                         layoutManager = LinearLayoutManager(baseContext)
                         summonerAdapter.updateSummoner(summonerInfo)
@@ -133,13 +151,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if(isswitch) {
-            if (UndeadService.serviceIntent == null) { //서비스가 실행중이지 않으면 실행
-                foregroundServiceIntent = Intent(this, UndeadService::class.java);
-                startService(foregroundServiceIntent)
-            } else { //실행중이면 Intent저장
-                foregroundServiceIntent = UndeadService.serviceIntent
-            }
+        if (isswitch) {
+            ServiceIntent()
+        }
+    }
+
+    private fun ServiceIntent() {
+        if (UndeadService.serviceIntent == null) { //서비스가 실행중이지 않으면 실행
+            foregroundServiceIntent = Intent(this, UndeadService::class.java);
+            startService(foregroundServiceIntent)
+        } else { //실행중이면 Intent저장
+            foregroundServiceIntent = UndeadService.serviceIntent
         }
     }
 
@@ -148,35 +170,30 @@ class MainActivity : AppCompatActivity() {
         summonerJob?.let {
             it.cancel()
         }
-        showJob?.let {
-            it.cancel()
-        }
         storeUserJob?.let {
             it.cancel()
         }
-        showUserJob?.let{
-            it.cancel()
-        }
+
     }
 
 
-    fun SummonerCoroutine() {
+    private suspend fun StoreSummoner() {
         summonerInfo.clear()
         allname = Preferences.getAll(this)!!
         for ((key, value) in allname.entries) {
-            api_key?.let { api_key->
+            api_key?.let { api_key ->
                 val curname = key
                 val curid = value.toString()
                 val curInfo = SummonerInfo()
-                call = myAPI.getsummoner(curname, api_key)
-                val response = call.execute()
+                val response = myAPI.getsummoner(curname, api_key)
                 if (response.isSuccessful) { // Summoner에서 레벨, Icon ID 획득 가능
                     curInfo.name = response.body()!!.name
                     curInfo.profileIconId = response.body()!!.profileIconId
                     curInfo.summonerLevel = response.body()!!.summonerLevel
                 }
-                call2 = myAPI.getLeague(curid, api_key)
-                val response2 = call2.execute()
+
+
+                val response2 = myAPI.getLeague(curid, api_key)
                 if (response2.isSuccessful) { //League에서 티어 랭크 승/패 포인트 알 수 있음 언랭이면 모든값 null
                     val Infoiterator = response2.body()!!.iterator()
                     while (Infoiterator.hasNext()) {
@@ -191,18 +208,17 @@ class MainActivity : AppCompatActivity() {
                         } else continue;
                     }
                 }
+
             }
         }
     }
 
-    fun StoreCoroutine(): Pair<String?, String?> {
+    private suspend fun Storeid(): Pair<String?, String?> {
         val str = editText.text.toString()
-        var cryptedid:String? = null
-
-        if(str != "") {
-            api_key?.let {api_key->
-                call = myAPI.getsummoner(str, api_key)
-                val response = call.execute()
+        var cryptedid: String? = null
+        if (str != "") {
+            api_key?.let { api_key ->
+                val response = myAPI.getsummoner(str, api_key)
                 if (response.isSuccessful) {
                     cryptedid = response.body()?.id
                 }
@@ -211,17 +227,25 @@ class MainActivity : AppCompatActivity() {
         return Pair<String?, String?>(str, cryptedid)
     }
 
-    fun makeToast(key: String, value: String) {
-        if (Preferences.getString(this, key) != "NoID") {
+    private fun makeToast(key: String, value: String) {
+        if (Preferences.getString(
+                this,
+                key
+            ) != "NoID"
+        ) {
             makeToastComment("이미 등록된 아이디 입니다.")
 
         } else {
-            Preferences.setString(this, key, value)
+            Preferences.setString(
+                this,
+                key,
+                value
+            )
             makeToastComment("등록 완료")
         }
     }
 
-    fun makeToastComment(str: String) {
+    private fun makeToastComment(str: String) {
         if (mToast != null) {
             mToast!!.cancel()
             mToast = Toast.makeText(this, str, Toast.LENGTH_SHORT)

@@ -1,29 +1,30 @@
-package com.example.lol_notification_project.Retrofit2
+package com.example.lol_notification_project.Model
 
-import com.example.lol_notification_project.JsonType.LeagueEntryDTO
-import com.example.lol_notification_project.JsonType.Spectator
-import com.example.lol_notification_project.JsonType.Summoner
+import com.example.lol_notification_project.Model.Data.LeagueEntryDTO
+import com.example.lol_notification_project.Model.Data.Spectator
+import com.example.lol_notification_project.Model.Data.Summoner
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.*
 
-interface MyServer {
+interface SummonerAPI {
 
     @GET("summoner/v4/summoners/by-name/{summonerName}")
-    fun getsummoner(
+    suspend fun getsummoner(
         @Path("summonerName") summonerName : String,
         @Query("api_key") api_key : String
-    ): Call<Summoner>
+    ): Response<Summoner>
 
     @GET("spectator/v4/active-games/by-summoner/{encryptedSummonerId}")
-    fun getspectator(
+    suspend fun getspectator(
         @Path("encryptedSummonerId") encryptedSummonerId : String?,
         @Query("api_key") api_key : String
-    ): Call<Spectator>
+    ): Response<Spectator>
 
     @GET("league/v4/entries/by-summoner/{encryptedSummonerId}")
-    fun getLeague(
+    suspend fun getLeague(
         @Path("encryptedSummonerId") encryptedSummonerId : String?,
         @Query("api_key") api_key: String
-    ): Call<Set<LeagueEntryDTO>>
+    ): Response<Set<LeagueEntryDTO>>
 
 }

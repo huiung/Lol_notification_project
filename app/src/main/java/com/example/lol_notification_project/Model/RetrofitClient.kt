@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.Retrofit2
+package com.example.lol_notification_project.Model
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -6,7 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
     private var instance : Retrofit? = null
 
-    fun getServer(): MyServer = instance!!.create(MyServer::class.java)
+    fun getServer(): SummonerAPI = instance!!.create(
+        SummonerAPI::class.java)
 
 
     fun getInstnace() : Retrofit {

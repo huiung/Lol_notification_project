@@ -9,15 +9,13 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.lol_notification_project.Receiver.AlarmReceiver
-import com.example.lol_notification_project.JsonType.Spectator
-import com.example.lol_notification_project.JsonType.Summoner
-import com.example.lol_notification_project.MainActivity
+import com.example.lol_notification_project.Model.Data.Spectator
+import com.example.lol_notification_project.View.MainActivity
 import com.example.lol_notification_project.Preferences
 import com.example.lol_notification_project.R
-import com.example.lol_notification_project.Retrofit2.MyServer
-import com.example.lol_notification_project.Retrofit2.RetrofitClient
+import com.example.lol_notification_project.Model.SummonerAPI
+import com.example.lol_notification_project.Model.RetrofitClient
 import kotlinx.coroutines.*
-import okhttp3.Dispatcher
 import retrofit2.Call
 import retrofit2.Retrofit
 import java.util.*
@@ -25,8 +23,7 @@ import java.util.*
 class UndeadService : Service() {
 
     lateinit var retrofit: Retrofit
-    lateinit var myAPI: MyServer
-    lateinit var call2: Call<Spectator>
+    lateinit var myAPI: SummonerAPI
     lateinit var scope: CoroutineScope
     var api_key: String? = " "
     private val channelId = "my_channel"
@@ -61,8 +58,7 @@ class UndeadService : Service() {
                                 for ((key, value) in it.entries) {
                                     val curname = key
                                     val curId = value.toString()
-                                    call2 = myAPI.getspectator(curId, api_key)
-                                    var response2 = call2.execute() //encryptedId 이용해서 현재 게임 여부 확인
+                                    var response2 = myAPI.getspectator(curId, api_key)
                                     if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
                                         if (Preferences.getLong(baseContext, curname + " game") != response2.body()!!.gameId) { //동일게임이면 알림 X
                                             response2.body()!!.gameId?.let {
@@ -106,7 +102,7 @@ class UndeadService : Service() {
         job?.let {
             it.cancel()
         }
-            serviceIntent = null
+        serviceIntent = null
     }
 
 

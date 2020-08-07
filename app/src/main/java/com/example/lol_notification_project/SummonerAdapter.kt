@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.lol_notification_project.util.getProgressDrwable
+import com.example.lol_notification_project.util.loadImage
 import kotlinx.android.synthetic.main.card_layout.view.*
 
 class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val context: Context): RecyclerView.Adapter<SummonerAdapter.SummonerViewHolder>() {
@@ -19,11 +21,27 @@ class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val con
     }
 
     class SummonerViewHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
-        var itemimage: ImageView = itemview.item_image
-        var itemid: TextView = itemview.item_id
-        var itemtitle: TextView = itemview.item_title
-        var itemleaguePoint: TextView = itemview.item_leaguePoint
-        var itemwinLoss: TextView = itemView.item_winLoss
+        private val itemimage: ImageView = itemview.item_image
+        private val itemid: TextView = itemview.item_id
+        private val itemtitle: TextView = itemview.item_title
+        private val itemleaguePoint: TextView = itemview.item_leaguePoint
+        private val itemwinLoss: TextView = itemView.item_winLoss
+        private val progressDrawable = getProgressDrwable(itemview.context)
+
+        fun bind(summoner: SummonerInfo) {
+
+            val title = "${summoner.tier} ${summoner.rank}"
+            itemtitle.text = title
+            val id = "${summoner.name}\nLV: ${summoner.summonerLevel}"
+            itemid.text = id
+            val points = summoner.leaguePoints.toString()+" 점"
+            itemleaguePoint.text = points
+            val winLoss =  "이번시즌 전적\n" +summoner.wins.toString() +"승 "+summoner.losses.toString() +"패"
+            itemwinLoss.text = winLoss
+            val uri = "https://ddragon.leagueoflegends.com/cdn/10.14.1/img/profileicon/${summoner.profileIconId}.png"
+            itemimage.loadImage(uri, progressDrawable)
+        }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SummonerViewHolder = (SummonerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_layout, parent, false)))
@@ -32,16 +50,6 @@ class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val con
 
 
     override fun onBindViewHolder(holder: SummonerViewHolder, position: Int) {
-        GlideApp.with(context)
-                .load("https://ddragon.leagueoflegends.com/cdn/10.14.1/img/profileicon/${summonerInfo.get(position).profileIconId}.png") //이미지 URL 파싱
-                .into(holder.itemimage)
-        var name_level = summonerInfo.get(position).name +"\nLV: " +summonerInfo.get(position).summonerLevel
-        holder.itemid.setText(name_level)
-        holder.itemtitle.setText(summonerInfo.get(position).tier+" "+summonerInfo.get(position).rank )
-        var points = summonerInfo.get(position).leaguePoints.toString()+" 점"
-        holder.itemleaguePoint.setText(points)
-
-        var winLoss =  "이번시즌 전적\n" +summonerInfo.get(position).wins.toString() +"승 "+summonerInfo.get(position).losses.toString() +"패"
-        holder.itemwinLoss.setText(winLoss)
+        holder.bind(summonerInfo[position])
     }
 }

@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.JsonType
+package com.example.lol_notification_project.Model.Data
 
 class Summoner {
     var accountId: String? = null
