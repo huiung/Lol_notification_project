@@ -13,7 +13,7 @@ object Preferences {
         preferences = context.getSharedPreferences("API", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putString(key, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun getAPI(context: Context, key: String) : String? {
@@ -25,7 +25,7 @@ object Preferences {
         preferences = context.getSharedPreferences("API", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putBoolean(key, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun getBool(context: Context, key: String) : Boolean {
@@ -37,7 +37,7 @@ object Preferences {
         preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putString(key, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun getString(context: Context, key: String) : String? {
@@ -55,14 +55,14 @@ object Preferences {
         preferences = context.getSharedPreferences("SummonerID", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.remove(key)
-        editor.commit()
+        editor.apply()
     }
 
     fun setLong(context: Context, key: String, value: Long) {
         preferences = context.getSharedPreferences("matchInfo", Activity.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putLong(key, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun getLong(context: Context, key: String) : Long {

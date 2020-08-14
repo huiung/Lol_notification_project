@@ -1,6 +1,7 @@
 package com.example.lol_notification_project
 
 import android.content.Context
+import android.os.AsyncTask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +30,6 @@ class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val con
         private val progressDrawable = getProgressDrwable(itemview.context)
 
         fun bind(summoner: SummonerInfo) {
-
             val title = "${summoner.tier} ${summoner.rank}"
             itemtitle.text = title
             val id = "${summoner.name}\nLV: ${summoner.summonerLevel}"

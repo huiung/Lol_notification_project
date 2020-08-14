@@ -1,14 +1,13 @@
 package com.example.lol_notification_project.View
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.webkit.WebViewClient
 import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lol_notification_project.Model.Data.LeagueEntryDTO
-import com.example.lol_notification_project.Model.Data.Summoner
 import com.example.lol_notification_project.Model.SummonerAPI
 import com.example.lol_notification_project.Model.RetrofitClient
 import com.example.lol_notification_project.Preferences
@@ -18,9 +17,6 @@ import com.example.lol_notification_project.SummonerAdapter
 import com.example.lol_notification_project.SummonerInfo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 
 
@@ -66,20 +62,21 @@ class MainActivity : AppCompatActivity() {
             switch1.toggle()
         }
 
-        button.setOnClickListener {
+        registerbtn.setOnClickListener {
             //등록
             storeUserJob = scope.launch {
                 if (isActive) {
-                    val id = Storeid()
+                    val id = storeid()
                     withContext(Dispatchers.Main) {
                         if (id.second == null) makeToastComment("존재하지 않는 아이디입니다.")
                         else makeToast(id.first!!, id.second!!)
+                        editText.setText("")
                     }
                 }
             }
         }
 
-        button2.setOnClickListener {
+        deletebtn.setOnClickListener {
             //삭제
             val str = editText.text.toString()
             if (Preferences.getString(
@@ -95,17 +92,25 @@ class MainActivity : AppCompatActivity() {
             } else {
                 makeToastComment("등록되지 않은 소환사 입니다.")
             }
+
+            editText.setText("")
         }
 
-        button3.setOnClickListener {
-            val str = editText2.text.toString()
-            api_key = str
+        changekeybtn.setOnClickListener {
+            api_key = editText2.text.toString()
             Preferences.setAPI(
                 this,
                 "Api_key",
-                str
+                api_key!!
             )
             makeToastComment("변경 완료")
+            editText2.setText("")
+        }
+
+        Link_button.setOnClickListener {
+
+            //startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://auth.riotgames.com/login#client_id=riot-developer-portal&redirect_uri=https%3A%2F%2Fdeveloper.riotgames.com%2Foauth2-callback&response_type=code&scope=openid%20email%20summoner")))
+            startActivity(Intent(baseContext, webViewActivity::class.java))
         }
 
         switch1.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
@@ -115,7 +120,7 @@ class MainActivity : AppCompatActivity() {
                     "switch",
                     true
                 )
-                ServiceIntent()
+                serviceIntent()
             } else {
                 Preferences.setBool(
                     this,
@@ -128,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         swipe_refresh.setOnRefreshListener {
             summonerJob = scope.launch {
                 if (isActive) {
-                    StoreSummoner()
+                    storeSummoner()
                     withContext(Dispatchers.Main) {
                         summonerAdapter.updateSummoner(summonerInfo)
                         recyclerview_main.adapter = summonerAdapter
@@ -140,7 +145,7 @@ class MainActivity : AppCompatActivity() {
 
         summonerJob = scope.launch {
             if (isActive) {
-                StoreSummoner()
+                storeSummoner()
                 withContext(Dispatchers.Main) {
                     recyclerview_main.apply {
                         layoutManager = LinearLayoutManager(baseContext)
@@ -151,12 +156,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         if (isswitch) {
-            ServiceIntent()
+            serviceIntent()
         }
     }
 
-    private fun ServiceIntent() {
+    private fun serviceIntent() {
         if (UndeadService.serviceIntent == null) { //서비스가 실행중이지 않으면 실행
             foregroundServiceIntent = Intent(this, UndeadService::class.java);
             startService(foregroundServiceIntent)
@@ -177,7 +183,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private suspend fun StoreSummoner() {
+    private suspend fun storeSummoner() {
         summonerInfo.clear()
         allname = Preferences.getAll(this)!!
         for ((key, value) in allname.entries) {
@@ -191,7 +197,6 @@ class MainActivity : AppCompatActivity() {
                     curInfo.profileIconId = response.body()!!.profileIconId
                     curInfo.summonerLevel = response.body()!!.summonerLevel
                 }
-
 
                 val response2 = myAPI.getLeague(curid, api_key)
                 if (response2.isSuccessful) { //League에서 티어 랭크 승/패 포인트 알 수 있음 언랭이면 모든값 null
@@ -213,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun Storeid(): Pair<String?, String?> {
+    private suspend fun storeid(): Pair<String?, String?> {
         val str = editText.text.toString()
         var cryptedid: String? = null
         if (str != "") {
