@@ -1,4 +1,4 @@
-package com.example.lol_notification_project
+package com.example.lol_notification_project.Model.Data
 
 class SummonerInfo() {
     var profileIconId: String? = null

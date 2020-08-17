@@ -1,9 +1,8 @@
-package com.example.lol_notification_project
+package com.example.lol_notification_project.Model
 
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.core.content.edit
 
 object Preferences {
 

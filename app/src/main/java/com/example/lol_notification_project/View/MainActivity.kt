@@ -1,20 +1,22 @@
 package com.example.lol_notification_project.View
 
+import android.content.DialogInterface
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.webkit.WebViewClient
 import android.widget.CompoundButton
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lol_notification_project.Model.SummonerAPI
 import com.example.lol_notification_project.Model.RetrofitClient
-import com.example.lol_notification_project.Preferences
+import com.example.lol_notification_project.Model.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.Service.UndeadService
-import com.example.lol_notification_project.SummonerAdapter
-import com.example.lol_notification_project.SummonerInfo
+import com.example.lol_notification_project.Model.Data.SummonerInfo
+import com.example.lol_notification_project.util.makeToast
+import com.example.lol_notification_project.util.makeToastComment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
@@ -24,9 +26,14 @@ class MainActivity : AppCompatActivity() {
 
     var foregroundServiceIntent: Intent? = null
 
+    lateinit var alert : AlertDialog.Builder
     lateinit var retrofit: Retrofit
     lateinit var myAPI: SummonerAPI
-    val summonerAdapter = SummonerAdapter(arrayListOf(), this)
+    val summonerAdapter =
+        SummonerAdapter(
+            arrayListOf(),
+            this
+        )
 
     lateinit var allname: MutableMap<String, *>
     lateinit var iterator: MutableIterator<String>
@@ -46,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        alert = AlertDialog.Builder(this)
 
         isswitch = Preferences.getBool(
             this,
@@ -64,52 +72,76 @@ class MainActivity : AppCompatActivity() {
 
         registerbtn.setOnClickListener {
             //등록
-            storeUserJob = scope.launch {
-                if (isActive) {
-                    val id = storeid()
-                    withContext(Dispatchers.Main) {
-                        if (id.second == null) makeToastComment("존재하지 않는 아이디입니다.")
-                        else makeToast(id.first!!, id.second!!)
-                        editText.setText("")
+            var id=""
+            alert.setTitle("소환사 등록/삭제").setMessage("소환사 이름을 입력해 주세요.")
+            val idText = EditText(this)
+            alert.setView(idText)
+
+            alert.setPositiveButton("등록", object: DialogInterface.OnClickListener {
+                override fun onClick(p0: DialogInterface?, p1: Int) {
+                    storeUserJob = scope.launch {
+                        if (isActive) {
+                            id = idText.text.toString()
+                            val curid = storeid(id)
+                            withContext(Dispatchers.Main) {
+                                if (curid.second == null) makeToastComment("존재하지 않는 아이디입니다.", baseContext)
+                                else makeToast(curid.first!!, curid.second!!, baseContext)
+                            }
+                        }
                     }
                 }
-            }
-        }
+            })
 
-        deletebtn.setOnClickListener {
-            //삭제
-            val str = editText.text.toString()
-            if (Preferences.getString(
-                    this,
-                    str
-                ) != "NoID"
-            ) {
-                Preferences.removeString(
-                    this,
-                    str
-                )
-                makeToastComment("삭제 완료")
-            } else {
-                makeToastComment("등록되지 않은 소환사 입니다.")
-            }
+            alert.setNegativeButton("삭제", object : DialogInterface.OnClickListener {
+                override fun onClick(p0: DialogInterface?, p1: Int) {
+                    id = idText.text.toString()
+                    if (Preferences.getString(
+                            baseContext,
+                            id
+                        ) != "NoID"
+                    ) {
+                        Preferences.removeString(
+                            baseContext,
+                            id
+                        )
+                        makeToastComment("삭제 완료", baseContext)
+                    } else {
+                        makeToastComment("등록되지 않은 소환사 입니다.", baseContext)
+                    }
 
-            editText.setText("")
+                }
+            })
+            alert.create().show()
         }
 
         changekeybtn.setOnClickListener {
-            api_key = editText2.text.toString()
-            Preferences.setAPI(
-                this,
-                "Api_key",
-                api_key!!
-            )
-            makeToastComment("변경 완료")
-            editText2.setText("")
+
+            alert.setTitle("API 키 변경").setMessage("변경할 키를 입력해 주세요.")
+            var idText = EditText(this)
+            alert.setView(idText)
+
+            alert.setPositiveButton("변경", object : DialogInterface.OnClickListener {
+                override fun onClick(p0: DialogInterface?, p1: Int) {
+                    api_key = idText.text.toString()
+                    Preferences.setAPI(
+                        baseContext,
+                        "Api_key",
+                        api_key!!
+                    )
+                    makeToastComment("변경 완료", baseContext)
+                }
+            })
+
+            alert.setNegativeButton("취소", object: DialogInterface.OnClickListener {
+                override fun onClick(p0: DialogInterface?, p1: Int) {
+
+                }
+
+            })
+            alert.create().show()
         }
 
         Link_button.setOnClickListener {
-
-            //startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://auth.riotgames.com/login#client_id=riot-developer-portal&redirect_uri=https%3A%2F%2Fdeveloper.riotgames.com%2Foauth2-callback&response_type=code&scope=openid%20email%20summoner")))
             startActivity(Intent(baseContext, webViewActivity::class.java))
         }
 
@@ -156,7 +188,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         if (isswitch) {
             serviceIntent()
         }
@@ -190,7 +221,8 @@ class MainActivity : AppCompatActivity() {
             api_key?.let { api_key ->
                 val curname = key
                 val curid = value.toString()
-                val curInfo = SummonerInfo()
+                val curInfo =
+                    SummonerInfo()
                 val response = myAPI.getsummoner(curname, api_key)
                 if (response.isSuccessful) { // Summoner에서 레벨, Icon ID 획득 가능
                     curInfo.name = response.body()!!.name
@@ -218,8 +250,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun storeid(): Pair<String?, String?> {
-        val str = editText.text.toString()
+    private suspend fun storeid(str: String): Pair<String?, String?> {
+
         var cryptedid: String? = null
         if (str != "") {
             api_key?.let { api_key ->
@@ -231,32 +263,4 @@ class MainActivity : AppCompatActivity() {
         }
         return Pair<String?, String?>(str, cryptedid)
     }
-
-    private fun makeToast(key: String, value: String) {
-        if (Preferences.getString(
-                this,
-                key
-            ) != "NoID"
-        ) {
-            makeToastComment("이미 등록된 아이디 입니다.")
-
-        } else {
-            Preferences.setString(
-                this,
-                key,
-                value
-            )
-            makeToastComment("등록 완료")
-        }
-    }
-
-    private fun makeToastComment(str: String) {
-        if (mToast != null) {
-            mToast!!.cancel()
-            mToast = Toast.makeText(this, str, Toast.LENGTH_SHORT)
-        } else mToast =
-            Toast.makeText(this, str, Toast.LENGTH_SHORT)
-        mToast?.show()
-    }
-
 }

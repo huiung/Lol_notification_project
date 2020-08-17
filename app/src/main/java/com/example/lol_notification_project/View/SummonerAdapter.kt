@@ -1,14 +1,14 @@
-package com.example.lol_notification_project
+package com.example.lol_notification_project.View
 
 import android.content.Context
-import android.os.AsyncTask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import com.example.lol_notification_project.Model.Data.SummonerInfo
+import com.example.lol_notification_project.R
 import com.example.lol_notification_project.util.getProgressDrwable
 import com.example.lol_notification_project.util.loadImage
 import kotlinx.android.synthetic.main.card_layout.view.*
@@ -44,7 +44,13 @@ class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val con
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SummonerViewHolder = (SummonerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_layout, parent, false)))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SummonerViewHolder = (SummonerViewHolder(
+        LayoutInflater.from(parent.context).inflate(
+            R.layout.card_layout,
+            parent,
+            false
+        )
+    ))
 
     override fun getItemCount(): Int = summonerInfo.size
 

@@ -9,14 +9,12 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.lol_notification_project.Receiver.AlarmReceiver
-import com.example.lol_notification_project.Model.Data.Spectator
 import com.example.lol_notification_project.View.MainActivity
-import com.example.lol_notification_project.Preferences
+import com.example.lol_notification_project.Model.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.Model.SummonerAPI
 import com.example.lol_notification_project.Model.RetrofitClient
 import kotlinx.coroutines.*
-import retrofit2.Call
 import retrofit2.Retrofit
 import java.util.*
 
