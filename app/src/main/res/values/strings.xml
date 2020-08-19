@@ -8,4 +8,6 @@
     <string name="add">등록/삭제</string>
     <string name="service_switch">Service</string>
     <string name="issue_key">KEY 발급</string>
+    <string name="add_remove">사용자 등록/삭제</string>
+    <string name="change_key">API 키 변경</string>
 </resources>

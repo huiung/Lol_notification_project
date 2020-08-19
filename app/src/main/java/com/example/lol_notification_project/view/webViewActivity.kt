@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.View
+package com.example.lol_notification_project.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

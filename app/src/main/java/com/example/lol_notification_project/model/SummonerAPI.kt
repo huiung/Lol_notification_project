@@ -1,9 +1,8 @@
-package com.example.lol_notification_project.Model
+package com.example.lol_notification_project.model
 
-import com.example.lol_notification_project.Model.Data.LeagueEntryDTO
-import com.example.lol_notification_project.Model.Data.Spectator
-import com.example.lol_notification_project.Model.Data.Summoner
-import retrofit2.Call
+import com.example.lol_notification_project.model.data.LeagueEntryDTO
+import com.example.lol_notification_project.model.data.Spectator
+import com.example.lol_notification_project.model.data.Summoner
 import retrofit2.Response
 import retrofit2.http.*
 

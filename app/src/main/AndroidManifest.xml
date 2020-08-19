@@ -16,8 +16,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".View.webViewActivity"></activity>
-        <activity android:name=".View.MainActivity">
+        <activity android:name=".view.webViewActivity"></activity>
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,17 +26,17 @@
         </activity>
 
         <service
-            android:name=".Service.UndeadService"
+            android:name=".service.UndeadService"
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".Service.RestartService"
+            android:name=".service.RestartService"
             android:enabled="true"
             android:exported="true" />
 
-        <receiver android:name=".Receiver.AlarmReceiver" />
+        <receiver android:name=".receiver.AlarmReceiver" />
         <receiver
-            android:name=".Receiver.RebootReceiver"
+            android:name=".receiver.RebootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

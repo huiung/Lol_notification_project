@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.Service
+package com.example.lol_notification_project.service
 
 import android.app.*
 import android.content.Context
@@ -8,12 +8,12 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.lol_notification_project.Receiver.AlarmReceiver
-import com.example.lol_notification_project.View.MainActivity
-import com.example.lol_notification_project.Model.Preferences
+import com.example.lol_notification_project.receiver.AlarmReceiver
+import com.example.lol_notification_project.view.MainActivity
+import com.example.lol_notification_project.model.Preferences
 import com.example.lol_notification_project.R
-import com.example.lol_notification_project.Model.SummonerAPI
-import com.example.lol_notification_project.Model.RetrofitClient
+import com.example.lol_notification_project.model.SummonerAPI
+import com.example.lol_notification_project.model.RetrofitClient
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import java.util.*
@@ -38,12 +38,29 @@ class UndeadService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        createNotificationChannel()
+
+        val mainintent = Intent(this, MainActivity::class.java).apply {
+            this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, mainintent, 0)
+        val builder1 = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info) //smallIcon
+            .setContentText("서비스가 실행 중입니다.") //내용
+            .setContentIntent(pendingIntent)
+
+        val notificationId1 = 101
+        val notification = builder1.build()
+        startForeground(notificationId1, notification);
+
         isswitch = Preferences.getBool(this, "switch")
         serviceIntent = intent
-        createNotificationChannel()
         retrofit = RetrofitClient.getInstnace()
         myAPI = RetrofitClient.getServer()
         api_key = Preferences.getAPI(this, "Api_key")
+
+        if(!isswitch) stopSelf()
 
         api_key?.let { api_key ->
             job = scope.launch {
@@ -53,7 +70,7 @@ class UndeadService : Service() {
                             val allname = Preferences.getAll(baseContext)
                             var curint = 0
                             allname?.let {
-                                for ((key, value) in it.entries) {
+                                for ((key, value) in it.entries) { // SharedPreferences의 모든 key, value
                                     val curname = key
                                     val curId = value.toString()
                                     var response2 = myAPI.getspectator(curId, api_key)
@@ -72,7 +89,7 @@ class UndeadService : Service() {
                                     }
                                 }
                             }
-                            delay(60000) //80초 쉬고 쿼리 날림
+                            delay(300000) //300초 쉬고 쿼리 날림 반복,
                             isswitch = Preferences.getBool(baseContext, "switch")
                             if(!isswitch) {
                                 stopSelf(startId)
@@ -93,6 +110,7 @@ class UndeadService : Service() {
     override fun onDestroy() { //Service Destroy 시 Alarm을 호출함 -> Alarm은 받은 intent를 broadcats -> Alarmreceiver가 이를 수신하여 서비스 재시작
         super.onDestroy()
 
+        isswitch = Preferences.getBool(this, "switch")
         Log.d("mytag", "서비스 onDestroy")
         //알람을 키고 진행중인 job cancel
         if(isswitch) setAlarmTimer()
@@ -107,6 +125,7 @@ class UndeadService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) { //Task Kill시
         super.onTaskRemoved(rootIntent)
 
+        isswitch = Preferences.getBool(this, "switch")
         Log.d("mytag", "onTaskRemoved")
         if(isswitch) setAlarmTimer()
         job?.let {
@@ -144,7 +163,18 @@ class UndeadService : Service() {
         val sender = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, sender)
+
+        if(Build.VERSION.SDK_INT >= 23) { //Doze 모드 대응
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, sender)
+        }
+        else {
+            if(Build.VERSION.SDK_INT >= 19) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, sender)
+            }
+            else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, sender)
+            }
+        }
     }
 
     private fun createNotificationChannel() { //채널 생성 오레오 이상부터 필수.

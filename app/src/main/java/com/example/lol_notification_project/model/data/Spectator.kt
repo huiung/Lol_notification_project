@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.Model.Data
+package com.example.lol_notification_project.model.data
 
 class Spectator {
     var gameId: Long? = null
