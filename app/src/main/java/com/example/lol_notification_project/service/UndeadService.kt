@@ -46,7 +46,7 @@ class UndeadService : Service() {
         }
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, mainintent, 0)
         val builder1 = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) //smallIcon
+            .setSmallIcon(R.drawable.icon) //smallIcon
             .setContentText("서비스가 실행 중입니다.") //내용
             .setContentIntent(pendingIntent)
 
@@ -66,37 +66,37 @@ class UndeadService : Service() {
             job = scope.launch {
                 var flag = true
                 while (flag) {
-                        try {
-                            val allname = Preferences.getAll(baseContext)
-                            var curint = 0
-                            allname?.let {
-                                for ((key, value) in it.entries) { // SharedPreferences의 모든 key, value
-                                    val curname = key
-                                    val curId = value.toString()
-                                    var response2 = myAPI.getspectator(curId, api_key)
-                                    if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
-                                        if (Preferences.getLong(baseContext, curname + " game") != response2.body()!!.gameId) { //동일게임이면 알림 X
-                                            response2.body()!!.gameId?.let {
-                                                Preferences.setLong(baseContext, curname + " game", it)
-                                            }
-                                            sendNotification(curname, curint++)
-                                        } else { //이전에 알림 보낸게임과 동일게임임
-                                            Log.d("mytag", "동일게임")
+                    try {
+                        val allname = Preferences.getAll(baseContext)
+                        var curint = 0
+                        allname?.let {
+                            for ((key, value) in it.entries) { // SharedPreferences의 모든 key, value
+                                val curname = key
+                                val curId = value.toString()
+                                var response2 = myAPI.getspectator(curId, api_key)
+                                if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
+                                    if (Preferences.getLong(baseContext, curname + " game") != response2.body()!!.gameId) { //동일게임이면 알림 X
+                                        response2.body()!!.gameId?.let {
+                                            Preferences.setLong(baseContext, curname + " game", it)
                                         }
-                                    } else {
-                                        //게임중 아님 앱 화면에 표시
-                                        Log.d("mytag", "현재 게임중이 아닙니다.")
+                                        sendNotification(curname, curint++)
+                                    } else { //이전에 알림 보낸게임과 동일게임임
+                                        Log.d("mytag", "동일게임")
                                     }
+                                } else {
+                                    //게임중 아님 앱 화면에 표시
+                                    Log.d("mytag", "현재 게임중이 아닙니다.")
                                 }
                             }
-                            delay(300000) //300초 쉬고 쿼리 날림 반복,
-                            isswitch = Preferences.getBool(baseContext, "switch")
-                            if(!isswitch) {
-                                stopSelf(startId)
-                            }
-                        } catch (e: Exception) {
-                            flag = false
                         }
+                        delay(300000) //300초 쉬고 쿼리 날림 반복,
+                        isswitch = Preferences.getBool(baseContext, "switch")
+                        if(!isswitch) {
+                            stopSelf(startId)
+                        }
+                    } catch (e: Exception) {
+                        flag = false
+                    }
                 } //while
             }
         }
@@ -143,7 +143,7 @@ class UndeadService : Service() {
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
 
         val builder1 = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) //smallIcon
+            .setSmallIcon(R.drawable.icon) //smallIcon
             .setContentTitle("LOL 알리미") //Title
             .setContentText("${curname} 소환사가 게임을 시작했습니다.") //내용
             .setAutoCancel(true) //알림 클릭시 알림 제거 여부

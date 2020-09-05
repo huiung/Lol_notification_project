@@ -1,9 +1,5 @@
 package com.example.lol_notification_project.view
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -17,12 +13,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.work.*
 import com.example.lol_notification_project.adapter.SummonerAdapter
 import com.example.lol_notification_project.model.SummonerAPI
 import com.example.lol_notification_project.model.RetrofitClient
@@ -31,7 +24,6 @@ import com.example.lol_notification_project.R
 import com.example.lol_notification_project.service.UndeadService
 import com.example.lol_notification_project.model.data.SummonerInfo
 import com.example.lol_notification_project.databinding.ActivityMainBinding
-import com.example.lol_notification_project.service.MyWorker
 import com.example.lol_notification_project.util.makeToast
 import com.example.lol_notification_project.util.makeToastComment
 import com.google.android.material.navigation.NavigationView
