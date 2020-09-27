@@ -2,6 +2,7 @@ package com.example.lol_notification_project.view
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lol_notification_project.adapter.SummonerAdapter
 import com.example.lol_notification_project.model.SummonerAPI
@@ -26,6 +29,7 @@ import com.example.lol_notification_project.model.data.SummonerInfo
 import com.example.lol_notification_project.databinding.ActivityMainBinding
 import com.example.lol_notification_project.util.makeToast
 import com.example.lol_notification_project.util.makeToastComment
+import com.example.lol_notification_project.viewmodel.CardViewModel
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_switch.view.*
@@ -43,12 +47,9 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
     lateinit var retrofit: Retrofit
     lateinit var myAPI: SummonerAPI
     lateinit var drawerSwitch: SwitchCompat
+    lateinit var viewModel: CardViewModel
 
-    val summonerAdapter =
-        SummonerAdapter(
-            arrayListOf(),
-            this
-        )
+    val summonerAdapter = SummonerAdapter(arrayListOf(), this)
 
     lateinit var allname: MutableMap<String, *>
     lateinit var iterator: MutableIterator<String>
@@ -101,17 +102,14 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main) //Data binding
+        val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        //Navigation Drawer setting
-        setSupportActionBar(main_layout_toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // 드로어를 꺼낼 홈 버튼 활성화
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_36) // 홈버튼 이미지 변경
-        supportActionBar?.setDisplayShowTitleEnabled(false) // 툴바에 타이틀 안보이게
-        main_navigationView.setNavigationItemSelectedListener(this) // Listener
-        drawerSwitch = main_navigationView.menu.findItem(R.id.nav_switch).actionView.drawer_switch //switch
-        progressBar.isIndeterminate = true
-        progressBar.indeterminateDrawable.setColorFilter(Color.rgb(60,179,113), android.graphics.PorterDuff.Mode.MULTIPLY) // Progress Bar 색깔
+        viewModel = ViewModelProviders.of(this ).get(CardViewModel::class.java)
+        binding.vm = viewModel
+        binding.lifecycleOwner = this
+
+        initNavigationDrawer()
+        initProgressBar()
 
 
         alert = AlertDialog.Builder(this)
@@ -148,6 +146,11 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
             }
         }
 
+        binding.recyclerviewMain.apply {
+            layoutManager = LinearLayoutManager(baseContext)
+            adapter = summonerAdapter
+        }
+
         summonerJob = scope.launch {
             if (isActive) {
                 withContext(Dispatchers.Main) {
@@ -172,6 +175,24 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         }
     }
 
+    private fun initProgressBar() {
+        progressBar.isIndeterminate = true
+        progressBar.indeterminateDrawable.setColorFilter(
+            Color.rgb(60, 179, 113),
+            PorterDuff.Mode.MULTIPLY
+        ) // Progress Bar 색깔
+    }
+
+    private fun initNavigationDrawer() {
+        setSupportActionBar(main_layout_toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true) // 드로어를 꺼낼 홈 버튼 활성화
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_36) // 홈버튼 이미지 변경
+        supportActionBar?.setDisplayShowTitleEnabled(false) // 툴바에 타이틀 안보이게
+        main_navigationView.setNavigationItemSelectedListener(this) // Listener
+        drawerSwitch =
+            main_navigationView.menu.findItem(R.id.nav_switch).actionView.drawer_switch //switch
+    }
+
     private fun setSwitch(b: Boolean) {
         if (b) {
             Preferences.setBool(
@@ -192,12 +213,11 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
 
     private fun changeapi() {
         alert.setTitle("API 키 변경").setMessage("변경할 키를 입력해 주세요.")
-        var idText = EditText(this)
+        val idText = EditText(this)
         alert.setView(idText)
 
         alert.setPositiveButton("변경") { p0, p1 ->
             api_key = idText.text.toString()
-            Log.d("mytag", api_key)
             Preferences.setAPI(
                 baseContext,
                 "Api_key",
@@ -228,13 +248,8 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
 
     override fun onDestroy() {
         super.onDestroy()
-        summonerJob?.let {
-            it.cancel()
-        }
-        storeUserJob?.let {
-            it.cancel()
-        }
-
+        summonerJob?.cancel()
+        storeUserJob?.cancel()
     }
 
 

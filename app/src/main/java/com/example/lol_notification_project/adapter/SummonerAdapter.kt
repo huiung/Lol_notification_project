@@ -10,13 +10,13 @@ import com.example.lol_notification_project.R
 import com.example.lol_notification_project.databinding.CardLayoutBinding
 
 
-class SummonerAdapter(var summonerInfo: ArrayList<SummonerInfo>, private val context: Context): RecyclerView.Adapter<SummonerAdapter.SummonerViewHolder>() {
+class SummonerAdapter(var summonerInfo: List<SummonerInfo> = arrayListOf()): RecyclerView.Adapter<SummonerAdapter.SummonerViewHolder>() {
 
-    fun updateSummoner(newSummoner: List<SummonerInfo>) {
-        summonerInfo.clear()
-        summonerInfo.addAll(newSummoner)
-        notifyDataSetChanged()
-    }
+//    fun updateSummoner(newSummoner: List<SummonerInfo>) {
+//        summonerInfo.clear()
+//        summonerInfo.addAll(newSummoner)
+//        notifyDataSetChanged()
+//    }
 
     //layout 이름에 따라 Binding 객체가 자동 생성됨 card_layout -> CardLayoutBinding
     class SummonerViewHolder(private val binding: CardLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
