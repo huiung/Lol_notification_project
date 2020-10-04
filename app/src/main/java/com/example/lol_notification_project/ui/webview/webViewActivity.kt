@@ -1,12 +1,7 @@
-package com.example.lol_notification_project.view
+package com.example.lol_notification_project.ui.webview
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.example.lol_notification_project.R
 import kotlinx.android.synthetic.main.activity_web_view.*

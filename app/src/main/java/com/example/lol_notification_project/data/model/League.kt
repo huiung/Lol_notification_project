@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.model.data
+package com.example.lol_notification_project.data.model
 
 class LeagueEntryDTO {
     var leagueId: String? = null

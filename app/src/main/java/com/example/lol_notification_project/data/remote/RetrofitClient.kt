@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.model
+package com.example.lol_notification_project.data.remote
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

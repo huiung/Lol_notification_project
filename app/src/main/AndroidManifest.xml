@@ -16,8 +16,8 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.webViewActivity"></activity>
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".ui.webview.webViewActivity"></activity>
+        <activity android:name=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +31,7 @@
             android:exported="true" />
 
         <service
-            android:name=".service.MyFirebaseMessagingService"
+            android:name=".data.remote.MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
