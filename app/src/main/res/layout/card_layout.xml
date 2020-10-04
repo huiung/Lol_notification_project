@@ -8,7 +8,7 @@
     <data>
         <variable
             name="SummonerItem"
-            type="com.example.lol_notification_project.model.data.SummonerInfo" />
+            type="com.example.lol_notification_project.data.model.SummonerInfo" />
     </data>
 
     <androidx.cardview.widget.CardView

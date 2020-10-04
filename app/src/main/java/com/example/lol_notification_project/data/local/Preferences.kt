@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.model
+package com.example.lol_notification_project.data.local
 
 import android.app.Activity
 import android.content.Context

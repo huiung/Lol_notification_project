@@ -1,4 +1,4 @@
-package com.example.lol_notification_project.service
+package com.example.lol_notification_project.data.remote
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +10,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.lol_notification_project.R
-import com.example.lol_notification_project.view.MainActivity
+import com.example.lol_notification_project.ui.main.MainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 

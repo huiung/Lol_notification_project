@@ -9,11 +9,11 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.lol_notification_project.receiver.AlarmReceiver
-import com.example.lol_notification_project.view.MainActivity
-import com.example.lol_notification_project.model.Preferences
+import com.example.lol_notification_project.ui.main.MainActivity
+import com.example.lol_notification_project.data.local.Preferences
 import com.example.lol_notification_project.R
-import com.example.lol_notification_project.model.SummonerAPI
-import com.example.lol_notification_project.model.RetrofitClient
+import com.example.lol_notification_project.data.remote.SummonerAPI
+import com.example.lol_notification_project.data.remote.RetrofitClient
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import java.util.*
@@ -73,19 +73,18 @@ class UndeadService : Service() {
                             for ((key, value) in it.entries) { // SharedPreferences의 모든 key, value
                                 val curname = key
                                 val curId = value.toString()
-                                var response2 = myAPI.getspectator(curId, api_key)
-                                if (response2.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
-                                    if (Preferences.getLong(baseContext, curname + " game") != response2.body()!!.gameId) { //동일게임이면 알림 X
-                                        response2.body()!!.gameId?.let {
+                                val response_spectator = myAPI.getspectator(curId, api_key)
+                                if (response_spectator.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
+                                    if (Preferences.getLong(baseContext, curname + " game") != response_spectator.body()!!.gameId) { //동일게임이면 알림 X
+                                        response_spectator.body()!!.gameId?.let {
                                             Preferences.setLong(baseContext, curname + " game", it)
                                         }
                                         sendNotification(curname, curint++)
                                     } else { //이전에 알림 보낸게임과 동일게임임
-                                        Log.d("mytag", "동일게임")
+                                        //Log.d("mytag", "동일게임")
                                     }
                                 } else {
-                                    //게임중 아님 앱 화면에 표시
-                                    Log.d("mytag", "현재 게임중이 아닙니다.")
+                                    //Log.d("mytag", "현재 게임중이 아닙니다.")
                                 }
                             }
                         }
@@ -115,8 +114,8 @@ class UndeadService : Service() {
         //알람을 키고 진행중인 job cancel
         if(isswitch) setAlarmTimer()
 
-        job?.let {
-            it.cancel()
+        job?.run {
+            cancel()
         }
         serviceIntent = null
     }
@@ -128,8 +127,8 @@ class UndeadService : Service() {
         isswitch = Preferences.getBool(this, "switch")
         Log.d("mytag", "onTaskRemoved")
         if(isswitch) setAlarmTimer()
-        job?.let {
-            it.cancel()
+        job?.run {
+            cancel()
         }
         serviceIntent = null
     }
@@ -148,7 +147,6 @@ class UndeadService : Service() {
             .setContentText("${curname} 소환사가 게임을 시작했습니다.") //내용
             .setAutoCancel(true) //알림 클릭시 알림 제거 여부
             .setContentIntent(pendingIntent) //클릭시 pendingIntent의 Activity로 이동
-
 
         NotificationManagerCompat.from(this).apply {
             notify(id, builder1.build())

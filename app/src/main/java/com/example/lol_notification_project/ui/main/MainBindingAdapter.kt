@@ -1,15 +1,19 @@
-package com.example.lol_notification_project.adapter
+package com.example.lol_notification_project.ui.main
 
+import android.content.Context
+import android.content.Intent
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.lol_notification_project.R
-import com.example.lol_notification_project.model.data.SummonerInfo
+import com.example.lol_notification_project.data.local.Preferences
+import com.example.lol_notification_project.data.model.SummonerInfo
+import com.example.lol_notification_project.service.UndeadService
 import com.example.lol_notification_project.util.getProgressDrwable
-import com.example.lol_notification_project.viewmodel.CardViewModel
 
 //layout단에서 App:annotaiont으로 접근해서 사용.
 @BindingAdapter("image")
@@ -31,33 +35,22 @@ fun SwipeRefreshLayout.refreshing(visible: Boolean) {
     isRefreshing = visible
 }
 
-@BindingAdapter("viewModel")
-fun setViewModel(view: RecyclerView, vm: CardViewModel) {
-        view.adapter?.run {
-            if(this is SummonerAdapter) {
-
-            }
-        } ?: run {
-            SummonerAdapter().apply {
-                view.adapter = this
-
-            }
-        }
-}
 
 @BindingAdapter("summoner")
-fun setRepositories(view: RecyclerView, items: List<SummonerInfo>) {
+fun setSummoner(view: RecyclerView, items: List<SummonerInfo>?) {
 
     view.adapter?.run {
-        if(this is SummonerAdapter) {
-            this.summonerInfo = items
+        if(this is MainAdapter) {
+            if (items != null) {
+                this.summonerInfo = items
+            }
             this.notifyDataSetChanged()
         }
     } ?: run {
-        SummonerAdapter(items).apply {
-            view.adapter = this
+        items?.let {
+            MainAdapter(it).apply {
+                view.adapter = this
+            }
         }
     }
-
 }
-
