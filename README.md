@@ -2,7 +2,7 @@
  LoL notification project using Android(+kotlin)
 
 
-<h4> 💡 Stack & Libraries <h4>
+<h4> 💡 Stack & Libraries </h4>
 
 Minimum SDK level 21
 Kotlin based + Coroutines for asynchronous.
