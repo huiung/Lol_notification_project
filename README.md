@@ -1,10 +1,10 @@
 # Lol_notification_project
  LoL notification project using Android(+kotlin)
 
+<br><br>
+<h1> 💡 Stack & Libraries </h1>
 
-<h2> 💡 Stack & Libraries </h2>
-
-<ol>
+<ul>
  <li> Minimum SDK level 21 </li>
  <li>Kotlin based + Coroutines for asynchronous.</li>
  <li>JetPack </li>
@@ -18,7 +18,7 @@
  <li>Alert Dialog </li>
  <li>Android Forground Service </li>
  <li>SharedPreferences - local database </li>
-</ol>
+</ul>
 
 
 
