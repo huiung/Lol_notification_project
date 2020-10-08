@@ -37,6 +37,6 @@
 
 
 
-https://huiung.tistory.com/category/Android 참고해주세요.
+https://huiung.tistory.com/175?category=934625 참고해주세요.
 
 [![Video Label](https://img.youtube.com/vi/X5Uy-_AatNI/0.jpg)](https://youtu.be/X5Uy-_AatNI?t=0s)
