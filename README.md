@@ -1,5 +1,5 @@
 <h1 align="center">Lol_notification_project</h1>
- <a align="center">LoL notification project using Android(+kotlin) </a>
+ <h4 align="center">LoL notification project using Android(+kotlin) </h4>
 
 <br><br>
 <h1> 💡 Stack & Libraries </h1>
