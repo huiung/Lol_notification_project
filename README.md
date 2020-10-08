@@ -21,9 +21,14 @@
 </ul>
 
 
-
-<h1> 📝 Usage Riot API <h1>
-
+<br><br>
+<h1> 📝 Usage Riot API </h1>
+<ul>
+ <li> SUMMONOER-V4  </li>
+ <li> SPECTATOR-V4  </li>
+ <li> LEAGUE-V4 API </li>
+ 
+</ul>
 
 
 
