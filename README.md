@@ -4,20 +4,21 @@
 
 <h2> 💡 Stack & Libraries </h2>
 
-Minimum SDK level 21
-Kotlin based + Coroutines for asynchronous.
-JetPack
-LiveData -observable data holder class.
-DataBinding -  bind UI components in my layouts to data sources 
-ViewModel - UI related data holder, Easily schedule asynchronous tasks for optimal execution.
-Retrofit2 - REST APIs.
-RecyclerView & CareView
-OkHttp3 - implementing interceptor, logging web server.
-Glide - loading images.
-Alert Dialog
-Android Forground Service
-SharedPreferences - local database
-
+<ol>
+ <li> Minimum SDK level 21 </li>
+ <li>Kotlin based + Coroutines for asynchronous.</li>
+ <li>JetPack </li>
+ <li>LiveData -observable data holder class. </li>
+ <li>DataBinding -  bind UI components in my layouts to data sources  </li>
+ <li>ViewModel - UI related data holder, Easily schedule asynchronous tasks for optimal execution. </li>
+ <li>Retrofit2 - REST APIs. </li>
+ <li>RecyclerView & CareView </li>
+ <li>OkHttp3 - implementing interceptor, logging web server. </li>
+ <li>Glide - loading images. </li>
+ <li>Alert Dialog </li>
+ <li>Android Forground Service </li>
+ <li>SharedPreferences - local database </li>
+</ol>
 
 
 
