@@ -1,5 +1,5 @@
-# Lol_notification_project
- LoL notification project using Android(+kotlin)
+<h1 align="center">Lol_notification_project</h1>
+ <a align="center">LoL notification project using Android(+kotlin) </a>
 
 <br><br>
 <h1> 💡 Stack & Libraries </h1>
