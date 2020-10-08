@@ -24,9 +24,9 @@
 <br><br>
 <h1> 📝 Usage Riot API </h1>
 <ul>
- <li> SUMMONOER-V4  </li>
- <li> SPECTATOR-V4  </li>
- <li> LEAGUE-V4 API </li>
+ <li> SUMMONOER-V4 - user register summoner by summoner name(ingame name) -> This app call SUMMONER-V4 API and store encrypted ID local database </li>
+ <li> SPECTATOR-V4 - If the service is "On",  This app service check whether summoners who are stored local database are playing LOL in every 5minutes -> This app call SPECTATOR-V4 API and get data   </li>
+ <li> LEAGUE-V4 API - Main Activity Show Summoner's info (Level, Summoner name, Icon, score, Tier...) -> If app run, This app call LEAGUE-V4 API  </li>
  
 </ul>
 
