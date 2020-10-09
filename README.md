@@ -18,6 +18,7 @@
  <li>Alert Dialog </li>
  <li>Android Forground Service </li>
  <li>SharedPreferences - local database </li>
+ <li>FCM - Firebase Cloud messaging </li>
 </ul>
 
 
