@@ -23,8 +23,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             Log.d("mytag", "Message Notification Body: ${it.body}")
             it.title?.let { it1 -> it.body?.let { it2 -> sendNotification(it1, it2) } }
         }
-
-
     }
 
     override fun onNewToken(token: String) {

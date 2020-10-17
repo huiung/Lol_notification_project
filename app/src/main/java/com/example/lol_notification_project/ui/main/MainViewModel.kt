@@ -50,20 +50,20 @@ class MainViewModel() : ViewModel() {
         Log.d("mytag", api_key.toString())
 
         for ((key, value) in allname.entries) {
-            api_key?.let { api_key ->
+            api_key?.let {
                 val curname = key
                 val curid = value.toString()
                 val curInfo = SummonerInfo()
-                val response_summoner = myAPI.getsummoner(curname, api_key)
+                val response_summoner = myAPI.getsummoner(curname, it)
                 if (response_summoner.isSuccessful) { // Summoner에서 레벨, Icon ID 획득 가능
-                    curInfo.name = response_summoner.body()!!.name
-                    curInfo.profileIconId = "https://ddragon.leagueoflegends.com/cdn/10.14.1/img/profileicon/${response_summoner.body()!!.profileIconId}.png"
-                    curInfo.summonerLevel = "LV: " + response_summoner.body()!!.summonerLevel
+                    curInfo.name = response_summoner.body()?.name
+                    curInfo.profileIconId = "https://ddragon.leagueoflegends.com/cdn/10.14.1/img/profileicon/${response_summoner.body()?.profileIconId}.png"
+                    curInfo.summonerLevel = "LV: " + response_summoner.body()?.summonerLevel
                 }
 
-                val response_league = myAPI.getLeague(curid, api_key)
+                val response_league = myAPI.getLeague(curid, it)
                 if (response_league.isSuccessful) { //League에서 티어 랭크 승/패 포인트 알 수 있음 언랭이면 모든값 null
-                    val Infoiterator = response_league.body()!!.iterator()
+                    val Infoiterator = response_league.body()?.iterator() ?: iterator {  }
                     while (Infoiterator.hasNext()) {
                         val curLeague = Infoiterator.next()
                         if (curLeague.queueType == "RANKED_SOLO_5x5") { //솔로랭크만 확인
@@ -79,7 +79,4 @@ class MainViewModel() : ViewModel() {
         return summoner
     }
 
-    override fun onCleared() {
-        super.onCleared()
-    }
 }

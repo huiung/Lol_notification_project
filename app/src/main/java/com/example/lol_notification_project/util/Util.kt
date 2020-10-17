@@ -43,8 +43,8 @@ suspend fun storeid(api_key: String?, id: String, myAPI: SummonerAPI): Pair<Stri
 
     var cryptedid: String? = null
     if (id != "") {
-        api_key?.let { api_key ->
-            val response = myAPI.getsummoner(id, api_key)
+        api_key?.let {
+            val response = myAPI.getsummoner(id, it)
             if (response.isSuccessful) {
                 cryptedid = response.body()?.id
             }
@@ -60,7 +60,6 @@ fun changeapi(context: Context, alert:AlertDialog.Builder) { //api 변경 관련
 
         alert.setPositiveButton("변경") { p0, p1 ->
             val api_key = idText.text.toString()
-            Log.d("mytag", api_key)
             Preferences.setAPI(context, "Api_key", api_key!!)
             makeToastComment("변경 완료", context)
         }

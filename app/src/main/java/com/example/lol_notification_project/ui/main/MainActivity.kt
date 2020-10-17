@@ -12,8 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lol_notification_project.data.remote.SummonerAPI
 import com.example.lol_notification_project.data.remote.RetrofitClient
@@ -43,6 +42,7 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
     lateinit var drawerSwitch: SwitchCompat
     lateinit var mainviewModel: MainViewModel
     lateinit var summonerjob: Job
+    lateinit var allname: MutableMap<String, *>
 
     companion object {
         var mToast: Toast? = null //static
@@ -51,9 +51,11 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Preferences.getAll(baseContext)?.run {
+            allname = this
+        }
         val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        val allname = Preferences.getAll(baseContext)!!
-        mainviewModel = ViewModelProviders.of(this ).get(MainViewModel::class.java)
+        mainviewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         binding.vm = mainviewModel
         binding.lifecycleOwner = this
 
@@ -61,6 +63,9 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         setvariable()
 
         swipe_refresh.setOnRefreshListener {
+            Preferences.getAll(baseContext)?.run {
+                allname = this
+            }
             api_key = Preferences.getAPI(this, "Api_key")
             mainviewModel.refresh(allname, api_key)
         }
