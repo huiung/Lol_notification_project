@@ -1,21 +1,14 @@
 package com.example.lol_notification_project.ui.main
 
-import android.app.Application
+
 import android.content.Context
-import android.util.Log
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.*
 import com.example.lol_notification_project.data.local.Preferences
-import com.example.lol_notification_project.data.remote.RetrofitClient
 import com.example.lol_notification_project.data.model.SummonerInfo
 import com.example.lol_notification_project.data.remote.SummonerAPI
-import com.example.lol_notification_project.util.makeToast
-import com.example.lol_notification_project.util.makeToastComment
-import com.example.lol_notification_project.util.storeid
 import kotlinx.coroutines.*
 
-class MainViewModel() : ViewModel() {
+class MainViewModel(private val myAPI: SummonerAPI, val context: Context) : ViewModel() {
 
     private val _summonerInfo = MutableLiveData<List<SummonerInfo>>()
     val summonerInfo: LiveData<List<SummonerInfo>> get() = _summonerInfo
@@ -23,34 +16,58 @@ class MainViewModel() : ViewModel() {
     private val _swipe_refresh = MutableLiveData<Boolean>()
     val swipe_refresh : LiveData<Boolean> get() = _swipe_refresh
 
-    fun refresh(allname: MutableMap<String, *>, api_key: String?) {
-        fetchSummoners(allname, api_key)
+    private val _isswitch = MutableLiveData<Boolean>()
+    val isswitch : LiveData<Boolean> get() = _isswitch
 
+    private val _api_key = MutableLiveData<String>()
+    val api_key : LiveData<String> get() = _api_key
+
+    private val _allname = MutableLiveData<MutableMap<String, *> >()
+    val allname : LiveData<MutableMap<String, *> > get() = _allname
+
+    init {
+        _isswitch.value = Preferences.getBool(context, "switch")
+        _api_key.value = Preferences.getAPI(context, "Api_key")
+        Preferences.getAll(context)?.run {
+            _allname.value = this
+        }
     }
 
-    private fun fetchSummoners(allname: MutableMap<String, *>, api_key: String?) {
+
+
+    fun refresh() {
+        fetchSummoners()
+    }
+
+    fun changeApi(key: String) {
+        _api_key.value = key
+        Preferences.setAPI(context, "Api_key", key)
+    }
+
+    fun toggle() {
+        _isswitch.value = !Preferences.getBool(context, "switch")
+        Preferences.setBool(context, "switch", _isswitch.value!!)
+    }
+
+    private fun fetchSummoners() {
         var curval : List<SummonerInfo>
 
         viewModelScope.launch {
             _swipe_refresh.value = true
             withContext(Dispatchers.Default) {
-                curval = storeSummoner(allname, api_key)
+                curval = storeSummoner()
             }
             _summonerInfo.value = curval
             _swipe_refresh.value =  false
         }
     }
 
-    private suspend fun storeSummoner(allname: MutableMap<String, *>, api_key: String?) : List<SummonerInfo> {
+    private suspend fun storeSummoner() : List<SummonerInfo> {
 
-        val retrofit = RetrofitClient.getInstnace()
-        val myAPI = RetrofitClient.getServer()
         val summoner: MutableList<SummonerInfo> = arrayListOf()
 
-        Log.d("mytag", api_key.toString())
-
-        for ((key, value) in allname.entries) {
-            api_key?.let {
+        for ((key, value) in allname.value?.entries!!) {
+            api_key.value?.let {
                 val curname = key
                 val curid = value.toString()
                 val curInfo = SummonerInfo()

@@ -15,8 +15,9 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".ui.webview.webViewActivity"></activity>
+        android:theme="@style/AppTheme"
+        android:name=".MyApplication">
+        <activity android:name=".ui.webview.webViewActivity" />
         <activity android:name=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

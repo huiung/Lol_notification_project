@@ -52,17 +52,3 @@ suspend fun storeid(api_key: String?, id: String, myAPI: SummonerAPI): Pair<Stri
     }
     return Pair<String?, String?>(id, cryptedid)
 }
-
-fun changeapi(context: Context, alert:AlertDialog.Builder) { //api 변경 관련 alertdialog
-    val idText = EditText(context)
-    alert.setTitle("API 키 변경").setMessage("변경할 키를 입력해 주세요.")
-        .setView(idText)
-
-        alert.setPositiveButton("변경") { p0, p1 ->
-            val api_key = idText.text.toString()
-            Preferences.setAPI(context, "Api_key", api_key!!)
-            makeToastComment("변경 완료", context)
-        }
-        .setNegativeButton("취소") { p0, p1 -> }
-        .create().show()
-}

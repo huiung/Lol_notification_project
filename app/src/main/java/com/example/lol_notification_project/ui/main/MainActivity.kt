@@ -12,10 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lol_notification_project.data.remote.SummonerAPI
-import com.example.lol_notification_project.data.remote.RetrofitClient
 import com.example.lol_notification_project.data.local.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.service.UndeadService
@@ -27,22 +26,21 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_switch.view.*
 import kotlinx.android.synthetic.main.main_toolbar.*
 import kotlinx.coroutines.*
-import retrofit2.Retrofit
+import org.koin.android.ext.android.inject
+import org.koin.android.viewmodel.ext.android.viewModel
 
 
 class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelectedListener {
 
     var foregroundServiceIntent: Intent? = null
-    var api_key: String? = " "
-    var isswitch = false
+    var summonerjob: Job? = null
 
     lateinit var alert : AlertDialog.Builder
-    lateinit var retrofit: Retrofit
-    lateinit var myAPI: SummonerAPI
     lateinit var drawerSwitch: SwitchCompat
-    lateinit var mainviewModel: MainViewModel
-    lateinit var summonerjob: Job
     lateinit var allname: MutableMap<String, *>
+
+    val mainviewModel: MainViewModel by viewModel()
+    val myAPI: SummonerAPI by inject()
 
     companion object {
         var mToast: Toast? = null //static
@@ -55,38 +53,28 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
             allname = this
         }
         val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        mainviewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         binding.vm = mainviewModel
         binding.lifecycleOwner = this
 
         initNavigationDrawer()
         setvariable()
+        observeViewModel()
 
         swipe_refresh.setOnRefreshListener {
-            Preferences.getAll(baseContext)?.run {
-                allname = this
-            }
-            api_key = Preferences.getAPI(this, "Api_key")
-            mainviewModel.refresh(allname, api_key)
+
+            mainviewModel.refresh()
         }
 
         binding.recyclerviewMain.apply {
             layoutManager = LinearLayoutManager(baseContext)
         }
 
-        mainviewModel.refresh(allname, api_key)
-        if (isswitch) {
-            drawerSwitch.toggle()
-            serviceIntent()
-        }
+        mainviewModel.refresh()
+
     }
 
     private fun setvariable() {
         alert = AlertDialog.Builder(this)
-        isswitch = Preferences.getBool(this, "switch")
-        api_key = Preferences.getAPI(this, "Api_key")
-        retrofit = RetrofitClient.getInstnace()
-        myAPI = RetrofitClient.getServer()
     }
 
     private fun initNavigationDrawer() {
@@ -96,19 +84,21 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         supportActionBar?.setDisplayShowTitleEnabled(false) // 툴바에 타이틀 안보이게
         main_navigationView.setNavigationItemSelectedListener(this) // Listener
         drawerSwitch = main_navigationView.menu.findItem(R.id.nav_switch).actionView.drawer_switch //switch
+        mainviewModel.isswitch.value?.run { if(this)drawerSwitch.toggle() }
         drawerSwitch.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
-            setSwitch(b)
+            mainviewModel.toggle()
         }
     }
 
-    private fun setSwitch(b: Boolean) {
-        if (b) {
-            Preferences.setBool(this, "switch", true)
-            serviceIntent()
-        } else {
-            Preferences.setBool(this, "switch", false)
-            stopService(Intent(this, UndeadService::class.java))
-        }
+    private fun observeViewModel() {
+        mainviewModel.isswitch.observe(this, Observer{isswitch ->
+            if(isswitch) {
+                serviceIntent()
+            }
+            else {
+                stopService(Intent(this, UndeadService::class.java))
+            }
+        })
     }
 
     private fun serviceIntent() {
@@ -141,7 +131,7 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
                 addremove()
             }
             R.id.change_key-> {
-                changeapi(baseContext, alert)
+                changeapi(alert)
             }
             R.id.issue_key-> {
                 startActivity(Intent(baseContext, webViewActivity::class.java))
@@ -161,8 +151,7 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
                 val id = idText.text.toString()
                 if (isActive) {
                     withContext(Dispatchers.Default) {
-                        api_key = Preferences.getAPI(baseContext, "Api_key")
-                        curid = storeid(api_key, id, myAPI)
+                        curid = storeid(mainviewModel.api_key.value, id, myAPI)
                     }
                     if (curid.second == null) makeToastComment("존재하지 않는 아이디입니다.", baseContext)
                     else makeToast(curid.first!!, curid.second!!, baseContext)
@@ -181,6 +170,19 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
             .create().show()
     }
 
+    fun changeapi(alert:AlertDialog.Builder) { //api 변경 관련 alertdialog
+        val idText = EditText(baseContext)
+        alert.setTitle("API 키 변경").setMessage("변경할 키를 입력해 주세요.")
+            .setView(idText)
+
+        alert.setPositiveButton("변경") { p0, p1 ->
+            mainviewModel.changeApi(idText.text.toString())
+            makeToastComment("변경 완료", baseContext)
+        }
+            .setNegativeButton("취소") { p0, p1 -> }
+            .create().show()
+    }
+
     override fun onBackPressed() { //뒤로가기 처리
         if(main_drawer_layout.isDrawerOpen(GravityCompat.START)){
             main_drawer_layout.closeDrawers()
@@ -191,6 +193,6 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
 
     override fun onDestroy() {
         super.onDestroy()
-        summonerjob.cancel()
+        summonerjob?.cancel()
     }
 }

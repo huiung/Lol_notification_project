@@ -13,20 +13,21 @@ import com.example.lol_notification_project.ui.main.MainActivity
 import com.example.lol_notification_project.data.local.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.data.remote.SummonerAPI
-import com.example.lol_notification_project.data.remote.RetrofitClient
+import com.example.lol_notification_project.ui.main.MainViewModel
 import kotlinx.coroutines.*
-import retrofit2.Retrofit
+import org.koin.android.ext.android.inject
 import java.util.*
 
 class UndeadService : Service() {
 
-    lateinit var retrofit: Retrofit
-    lateinit var myAPI: SummonerAPI
     lateinit var scope: CoroutineScope
-    var api_key: String? = " "
     private val channelId = "my_channel"
-    var isswitch = false
     var job: Job? = null
+
+    val myAPI: SummonerAPI by inject()
+
+    lateinit var mainviewModel : MainViewModel
+
 
     companion object {
         var serviceIntent: Intent? = null //static
@@ -35,6 +36,7 @@ class UndeadService : Service() {
     override fun onCreate() {
         super.onCreate()
         scope = CoroutineScope(Dispatchers.Default)
+        mainviewModel = MainViewModel(myAPI, baseContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -54,22 +56,17 @@ class UndeadService : Service() {
         val notification = builder1.build()
         startForeground(notificationId1, notification);
 
-        isswitch = Preferences.getBool(this, "switch")
         serviceIntent = intent
-        retrofit = RetrofitClient.getInstnace()
-        myAPI = RetrofitClient.getServer()
-        api_key = Preferences.getAPI(this, "Api_key")
 
-        if(!isswitch) stopSelf()
+        if(!mainviewModel.isswitch.value!!) stopSelf()
 
-        api_key?.let { api_key ->
+        mainviewModel.api_key.value?.let { api_key ->
             job = scope.launch {
                 var flag = true
                 while (flag) {
                     try {
-                        val allname = Preferences.getAll(baseContext)
                         var curint = 0
-                        allname?.let {
+                        mainviewModel.allname.value?.let {
                             for ((key, value) in it.entries) { // SharedPreferences의 모든 key, value
                                 val curname = key
                                 val curId = value.toString()
@@ -81,16 +78,15 @@ class UndeadService : Service() {
                                         }
                                         sendNotification(curname, curint++)
                                     } else { //이전에 알림 보낸게임과 동일게임임
-                                        //Log.d("mytag", "동일게임")
+                                        Log.d("mytag", "동일게임")
                                     }
                                 } else {
-                                    //Log.d("mytag", "현재 게임중이 아닙니다.")
+                                    Log.d("mytag", "현재 게임중이 아닙니다.")
                                 }
                             }
                         }
                         delay(300000) //300초 쉬고 쿼리 날림 반복,
-                        isswitch = Preferences.getBool(baseContext, "switch")
-                        if(!isswitch) {
+                        if(!mainviewModel.isswitch.value!!) {
                             stopSelf(startId)
                         }
                     } catch (e: Exception) {
@@ -109,14 +105,10 @@ class UndeadService : Service() {
     override fun onDestroy() { //Service Destroy 시 Alarm을 호출함 -> Alarm은 받은 intent를 broadcats -> Alarmreceiver가 이를 수신하여 서비스 재시작
         super.onDestroy()
 
-        isswitch = Preferences.getBool(this, "switch")
         Log.d("mytag", "서비스 onDestroy")
         //알람을 키고 진행중인 job cancel
-        if(isswitch) setAlarmTimer()
-
-        job?.run {
-            cancel()
-        }
+        if(!mainviewModel.isswitch.value!!) setAlarmTimer()
+        job?.cancel()
         serviceIntent = null
     }
 
@@ -124,12 +116,9 @@ class UndeadService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) { //Task Kill시
         super.onTaskRemoved(rootIntent)
 
-        isswitch = Preferences.getBool(this, "switch")
         Log.d("mytag", "onTaskRemoved")
-        if(isswitch) setAlarmTimer()
-        job?.run {
-            cancel()
-        }
+        if(!mainviewModel.isswitch.value!!) setAlarmTimer()
+        job?.cancel()
         serviceIntent = null
     }
 
