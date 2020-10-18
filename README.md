@@ -19,6 +19,7 @@
  <li>Android Forground Service </li>
  <li>SharedPreferences - local database </li>
  <li>FCM - Firebase Cloud messaging </li>
+ <li>Koin - A pragmatic lightweight dependency injection framework for Kotlin</li>
 </ul>
 
 
