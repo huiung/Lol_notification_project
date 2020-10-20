@@ -12,7 +12,7 @@
  <li>DataBinding -  bind UI components in my layouts to data sources  </li>
  <li>ViewModel - UI related data holder, Easily schedule asynchronous tasks for optimal execution. </li>
  <li>Retrofit2 - REST APIs. </li>
- <li>RecyclerView & CareView </li>
+ <li>RecyclerView & CardView </li>
  <li>OkHttp3 - implementing interceptor, logging web server. </li>
  <li>Glide - loading images. </li>
  <li>Alert Dialog </li>
