@@ -32,6 +32,7 @@ fun bindImage(view: ImageView, uri: String?) { //imageView에 값을 넣기위�
 
 @BindingAdapter("refreshing")
 fun SwipeRefreshLayout.refreshing(visible: Boolean) {
+
     isRefreshing = visible
 }
 

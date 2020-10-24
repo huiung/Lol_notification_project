@@ -29,10 +29,8 @@ fun makeToastComment(str: String, context: Context) {
 }
 
 fun makeToast(key: String, value: String, context: Context) {
-    if (Preferences.getString(context, key) != "NoID"
-    ) {
+    if (Preferences.getString(context, key) != "NoID") {
         makeToastComment("이미 등록된 아이디 입니다.", context)
-
     } else {
         Preferences.setString(context, key, value)
         makeToastComment("등록 완료", context)

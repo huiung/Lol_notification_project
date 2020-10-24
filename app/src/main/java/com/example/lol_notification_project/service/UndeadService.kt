@@ -72,8 +72,8 @@ class UndeadService : Service() {
                                 val curId = value.toString()
                                 val response_spectator = myAPI.getspectator(curId, api_key)
                                 if (response_spectator.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
-                                    if (Preferences.getLong(baseContext, curname + " game") != response_spectator.body()!!.gameId) { //동일게임이면 알림 X
-                                        response_spectator.body()!!.gameId?.let {
+                                    if (Preferences.getLong(baseContext, curname + " game") != response_spectator.body()?.gameId) { //동일게임이면 알림 X
+                                        response_spectator.body()?.gameId?.let {
                                             Preferences.setLong(baseContext, curname + " game", it)
                                         }
                                         sendNotification(curname, curint++)
@@ -104,10 +104,9 @@ class UndeadService : Service() {
 
     override fun onDestroy() { //Service Destroy 시 Alarm을 호출함 -> Alarm은 받은 intent를 broadcats -> Alarmreceiver가 이를 수신하여 서비스 재시작
         super.onDestroy()
-
-        Log.d("mytag", "서비스 onDestroy")
-        //알람을 키고 진행중인 job cancel
-        if(!mainviewModel.isswitch.value!!) setAlarmTimer()
+        mainviewModel.isswitch.value?. run {
+            if(!this) setAlarmTimer()
+        }
         job?.cancel()
         serviceIntent = null
     }
@@ -115,9 +114,9 @@ class UndeadService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) { //Task Kill시
         super.onTaskRemoved(rootIntent)
-
-        Log.d("mytag", "onTaskRemoved")
-        if(!mainviewModel.isswitch.value!!) setAlarmTimer()
+        mainviewModel.isswitch.value?. run {
+            if(!this) setAlarmTimer()
+        }
         job?.cancel()
         serviceIntent = null
     }

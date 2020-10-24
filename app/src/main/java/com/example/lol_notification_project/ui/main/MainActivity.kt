@@ -14,8 +14,6 @@ import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lol_notification_project.data.remote.SummonerAPI
-import com.example.lol_notification_project.data.local.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.service.UndeadService
 import com.example.lol_notification_project.databinding.ActivityMainBinding
@@ -25,22 +23,17 @@ import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_switch.view.*
 import kotlinx.android.synthetic.main.main_toolbar.*
-import kotlinx.coroutines.*
-import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 
 
 class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelectedListener {
 
     var foregroundServiceIntent: Intent? = null
-    var summonerjob: Job? = null
 
     lateinit var alert : AlertDialog.Builder
     lateinit var drawerSwitch: SwitchCompat
-    lateinit var allname: MutableMap<String, *>
 
     val mainviewModel: MainViewModel by viewModel()
-    val myAPI: SummonerAPI by inject()
 
     companion object {
         var mToast: Toast? = null //static
@@ -49,19 +42,15 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Preferences.getAll(baseContext)?.run {
-            allname = this
-        }
         val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.vm = mainviewModel
         binding.lifecycleOwner = this
 
+        alert = AlertDialog.Builder(this)
         initNavigationDrawer()
-        setvariable()
         observeViewModel()
 
         swipe_refresh.setOnRefreshListener {
-
             mainviewModel.refresh()
         }
 
@@ -69,26 +58,22 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
             layoutManager = LinearLayoutManager(baseContext)
         }
 
-        mainviewModel.refresh()
+    mainviewModel.refresh()
 
-    }
+}
 
-    private fun setvariable() {
-        alert = AlertDialog.Builder(this)
+private fun initNavigationDrawer() {
+    setSupportActionBar(main_layout_toolbar)
+    supportActionBar?.setDisplayHomeAsUpEnabled(true) // 드로어를 꺼낼 홈 버튼 활성화
+    supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_36) // 홈버튼 이미지 변경
+    supportActionBar?.setDisplayShowTitleEnabled(false) // 툴바에 타이틀 안보이게
+    main_navigationView.setNavigationItemSelectedListener(this) // Listener
+    drawerSwitch = main_navigationView.menu.findItem(R.id.nav_switch).actionView.drawer_switch //switch
+    mainviewModel.isswitch.value?.run { if(this)drawerSwitch.toggle() }
+    drawerSwitch.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
+        mainviewModel.toggle()
     }
-
-    private fun initNavigationDrawer() {
-        setSupportActionBar(main_layout_toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // 드로어를 꺼낼 홈 버튼 활성화
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_36) // 홈버튼 이미지 변경
-        supportActionBar?.setDisplayShowTitleEnabled(false) // 툴바에 타이틀 안보이게
-        main_navigationView.setNavigationItemSelectedListener(this) // Listener
-        drawerSwitch = main_navigationView.menu.findItem(R.id.nav_switch).actionView.drawer_switch //switch
-        mainviewModel.isswitch.value?.run { if(this)drawerSwitch.toggle() }
-        drawerSwitch.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
-            mainviewModel.toggle()
-        }
-    }
+}
 
     private fun observeViewModel() {
         mainviewModel.isswitch.observe(this, Observer{isswitch ->
@@ -97,6 +82,23 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
             }
             else {
                 stopService(Intent(this, UndeadService::class.java))
+            }
+        })
+
+        mainviewModel.check_id.observe(this, Observer {check_id ->
+            if(check_id) {
+                makeToastComment("삭제 완료", baseContext)
+            } else {
+                makeToastComment("등록되지 않은 소환사 입니다.", baseContext)
+            }
+        })
+
+        mainviewModel.add_id.observe(this, Observer { add_id ->
+            if(add_id.second == null) {
+                makeToastComment("존재하지 않는 아이디입니다.", baseContext)
+            }
+            else {
+                makeToast(add_id.first!!, add_id.second!!, baseContext)
             }
         })
     }
@@ -144,28 +146,12 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         val idText = EditText(this)
         alert.setTitle("소환사 등록/삭제").setMessage("소환사 이름을 입력해 주세요.")
             .setView(idText)
-        var curid: Pair<String?, String?>
 
         alert.setPositiveButton("등록") { p0, p1 ->
-            summonerjob = CoroutineScope(Dispatchers.Main).launch {
-                val id = idText.text.toString()
-                if (isActive) {
-                    withContext(Dispatchers.Default) {
-                        curid = storeid(mainviewModel.api_key.value, id, myAPI)
-                    }
-                    if (curid.second == null) makeToastComment("존재하지 않는 아이디입니다.", baseContext)
-                    else makeToast(curid.first!!, curid.second!!, baseContext)
-                }
+                mainviewModel.addsummoner(idText.text.toString())
             }
-        }
             .setNegativeButton("삭제") { p0, p1 ->
-                val id = idText.text.toString()
-                if (Preferences.getString(baseContext, id) != "NoID") {
-                    Preferences.removeString(baseContext, id)
-                    makeToastComment("삭제 완료", baseContext)
-                } else {
-                    makeToastComment("등록되지 않은 소환사 입니다.", baseContext)
-                }
+                mainviewModel.check_id(idText.text.toString())
             }
             .create().show()
     }
@@ -178,7 +164,7 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         alert.setPositiveButton("변경") { p0, p1 ->
             mainviewModel.changeApi(idText.text.toString())
             makeToastComment("변경 완료", baseContext)
-        }
+            }
             .setNegativeButton("취소") { p0, p1 -> }
             .create().show()
     }
@@ -191,8 +177,4 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        summonerjob?.cancel()
-    }
 }
