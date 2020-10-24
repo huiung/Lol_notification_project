@@ -57,7 +57,6 @@ class MainActivity : AppCompatActivity(),  NavigationView.OnNavigationItemSelect
         binding.recyclerviewMain.apply {
             layoutManager = LinearLayoutManager(baseContext)
         }
-
     mainviewModel.refresh()
 
 }

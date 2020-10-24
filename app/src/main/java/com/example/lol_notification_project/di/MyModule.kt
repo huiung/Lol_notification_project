@@ -1,6 +1,8 @@
 package com.example.lol_notification_project.di
 
+import com.example.lol_notification_project.data.local.Preferences
 import com.example.lol_notification_project.data.remote.SummonerAPI
+import com.example.lol_notification_project.data.repository.MainRepository
 import com.example.lol_notification_project.ui.main.MainViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.dsl.viewModel
@@ -10,7 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 val appModule = module {
 
-
     single {
         Retrofit.Builder()
             .baseUrl("https://kr.api.riotgames.com/lol/")
@@ -18,8 +19,16 @@ val appModule = module {
             .build()
             .create(SummonerAPI::class.java)
     }
+
+    single {
+        Preferences(androidContext())
+    }
+
+    factory {
+        MainRepository(get(), get())
+    }
 }
 
 val mainViewModelModule = module {
-    viewModel { MainViewModel(get(), androidContext()) }
+    viewModel { MainViewModel(get()) }
 }

@@ -13,6 +13,7 @@ import com.example.lol_notification_project.ui.main.MainActivity
 import com.example.lol_notification_project.data.local.Preferences
 import com.example.lol_notification_project.R
 import com.example.lol_notification_project.data.remote.SummonerAPI
+import com.example.lol_notification_project.data.repository.MainRepository
 import com.example.lol_notification_project.ui.main.MainViewModel
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
@@ -24,10 +25,9 @@ class UndeadService : Service() {
     private val channelId = "my_channel"
     var job: Job? = null
 
-    val myAPI: SummonerAPI by inject()
-
     lateinit var mainviewModel : MainViewModel
-
+    val Preferences: Preferences by inject()
+    val mainRepository: MainRepository by inject()
 
     companion object {
         var serviceIntent: Intent? = null //static
@@ -36,7 +36,8 @@ class UndeadService : Service() {
     override fun onCreate() {
         super.onCreate()
         scope = CoroutineScope(Dispatchers.Default)
-        mainviewModel = MainViewModel(myAPI, baseContext)
+        mainviewModel = MainViewModel( mainRepository )
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -70,11 +71,11 @@ class UndeadService : Service() {
                             for ((key, value) in it.entries) { // SharedPreferences의 모든 key, value
                                 val curname = key
                                 val curId = value.toString()
-                                val response_spectator = myAPI.getspectator(curId, api_key)
+                                val response_spectator = mainRepository.getspectator(curId, api_key)
                                 if (response_spectator.isSuccessful) { //응답이 왔다면 게임중임 따라서 알림 발사
-                                    if (Preferences.getLong(baseContext, curname + " game") != response_spectator.body()?.gameId) { //동일게임이면 알림 X
+                                    if (Preferences.getLong(curname + " game") != response_spectator.body()?.gameId) { //동일게임이면 알림 X
                                         response_spectator.body()?.gameId?.let {
-                                            Preferences.setLong(baseContext, curname + " game", it)
+                                            Preferences.setLong(curname + " game", it)
                                         }
                                         sendNotification(curname, curint++)
                                     } else { //이전에 알림 보낸게임과 동일게임임
